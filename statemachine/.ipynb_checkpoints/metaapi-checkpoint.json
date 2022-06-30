@@ -76,6 +76,43 @@
         }
       } 
     },
+    "SetupSaveCandlesFromTicks": {
+      "Next": "ChoiceSaveCandlesFromTicks",
+      "Type": "Task",
+      "Resource": "${SetupSaveCandlesFromTicks}",
+      "ResultPath": "$.ResultSetupSaveCandlesFromTicks",
+    },
+    "ChoiceSaveCandlesFromTicks": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.ResultSetupSaveCandlesFromTicks.n_items",
+          "NumericEquals": 0,
+          "Next": "Success"
+        }
+      ],
+      "Default": "MapSaveCandlesFromTicks"
+    },
+    "MapSaveCandlesFromTicks": {
+      "Next": "SetupSaveCandlesFromTicks",
+      "Type": "Map",
+      "MaxConcurrency": 0,
+      "ItemsPath": "$.ResultSetupSaveCandlesFromTicks.batches",
+      "ResultPath": "$.ResultSaveCandlesFromTicks",
+      "Parameters": {
+        "batch.$": "$$.Map.Item.Value"
+      },
+      "Iterator": {
+        "StartAt": "SaveCandlesFromTicks",
+        "States": {
+          "SaveCandlesFromTicks": {
+            "End": true,
+            "Type": "Task",
+            "Resource": "${SaveCandlesFromTicks}"
+          }
+        }
+      } 
+    },
     "Success": {
       "Type": "Succeed"
     }

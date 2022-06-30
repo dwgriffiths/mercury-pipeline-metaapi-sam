@@ -16,7 +16,7 @@ def idxmax(s):
         return 0
     return np.argmax(s)
 
-def get_ticks_to_candles(
+def get_candles_from_ticks(
     df_ticks: pd.DataFrame,
     frequency: str
 ):

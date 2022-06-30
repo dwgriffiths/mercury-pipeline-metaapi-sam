@@ -1,3 +1,4 @@
+import awswrangler as wr
 from datetime import datetime, timedelta, date
 import pandas as pd
 
@@ -6,9 +7,9 @@ from src.io import *
 from src.utils import * 
 from src.ticks.clean.io import *
 from src.candles.io import *
-from src.candles.from_ticks.get import get_ticks_to_candles
+from src.candles.from_ticks.get import get_candles_from_ticks
     
-def setup_save_ticks_to_candles(
+def setup_save_candles_from_ticks(
     overwrite: bool,
     batch_size: int
 ):
@@ -48,7 +49,7 @@ def setup_save_ticks_to_candles(
     items = sorted(items, key=lambda x: x.get("datetimestr"), reverse=True)
     return batch_items(items, batch_size)
 
-def save_ticks_to_candles(
+def save_candles_from_ticks(
     prefix_clean_ticks: str,
     frequencies: list,
     name_dataset: str
@@ -59,27 +60,30 @@ def save_ticks_to_candles(
         prefix_candles = convert_prefix_clean_ticks_to_prefix_candles(
             prefix_clean_ticks
         )
-        delete_objects(
+        wr.s3.delete_objects(
             get_matching_keys_clean_ticks(prefix_candles)
         )
     
         # Load clean ticks
-        df_clean_ticks = pd.read_parquet(
-            f"s3://{BUCKET}/{prefix_clean_ticks}",
+        df_clean_ticks = wr.s3.read_parquet(
+            path=f"s3://{BUCKET}/{prefix_clean_ticks}",
+            dataset=True
         )
 
         # Candlise ticks
         df_candles = get_ticks_to_candles(df_clean_ticks, frequency)
         
         # Make sure the partition_cols are in there
-        df_candles["frequency"] = frequency
         filters = get_parameters_from_key(prefix_clean_ticks)
         for k, v in filters.items():
             df_candles[k] = v
+        df_candles["frequency"] = frequency
             
         #Save as parquet
-        df_candles.to_parquet(
-            f"s3://{BUCKET}/{DIR_CANDLES_ROOT}/{name_dataset}/",
+        wr.s3.to_parquet(
+            df_candles,
+            path=f"s3://{BUCKET}/{DIR_CANDLES_ROOT}/{name_dataset}/",
+            dataset=True,
             partition_cols=[
                 "symbol",
                 "frequency",

@@ -14,10 +14,6 @@ Parameters:
     Description: Name of the datalake bucket
     Type: String
     Default: datalake.dgriffiths.io
-  BuildTimestamp:
-    Description: A timestamp to make sure the functions are recreated from scratch
-    Type: String
-    Default: notimestamp
   MetaAPIKey:
     Description: The Arn for the MetaAPIKey Secret
     Type: String
@@ -41,6 +37,8 @@ Resources:
         SaveRawTicks: !GetAtt SaveRawTicks.Arn
         SetupSaveCleanTicks: !GetAtt SetupSaveCleanTicks.Arn
         SaveCleanTicks: !GetAtt SaveCleanTicks.Arn
+        SetupSaveCandlesFromTicks: !GetAtt SetupSaveCandlesFromTicks.Arn
+        SaveCandlesFromTicks: !GetAtt SaveCandlesFromTicks.Arn
       Policies:
         - LambdaInvokePolicy:
             FunctionName: !Ref SetupSaveRawTicks
@@ -50,6 +48,10 @@ Resources:
             FunctionName: !Ref SetupSaveCleanTicks
         - LambdaInvokePolicy:
             FunctionName: !Ref SaveCleanTicks
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SetupSaveCandlesFromTicks
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SaveCandlesFromTicks
 
   SetupSaveRawTicks:
     Type: AWS::Serverless::Function
@@ -100,6 +102,34 @@ Resources:
       Role: !GetAtt [ LambdaExecutionRole, Arn ]
       ImageConfig:
         Command: [ "app.lambda_save_clean_ticks" ]
+      Timeout: 900
+      MemorySize: 512
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./workflow
+      DockerTag: python3.8-v1
+      
+  SetupSaveCandlesFromTicks:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Role: !GetAtt [ LambdaExecutionRole, Arn ]
+      ImageConfig:
+        Command: [ "app.lambda_setup_save_candles_from_ticks" ]
+      Timeout: 300
+      MemorySize: 512
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./workflow
+      DockerTag: python3.8-v1
+      
+  SaveCandlesFromTicks:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Role: !GetAtt [ LambdaExecutionRole, Arn ]
+      ImageConfig:
+        Command: [ "app.lambda_save_candles_from_ticks" ]
       Timeout: 900
       MemorySize: 512
     Metadata:
@@ -163,25 +193,9 @@ Outputs:
   SaveCleanTicks:
     Description: Function Arn
     Value: !GetAtt SaveCleanTicks.Arn
-    
-    
-    
-#     Events:
-#         HelloWorld:
-#           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-#           Properties:
-#             Path: /hello
-#             Method: get
-#     Metadata:
-#       Dockerfile: Dockerfile
-#       DockerContext: ./hello_world
-#       DockerTag: {{cookiecutter.runtime}}-v1
-
-# Outputs:
-#   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-#   # Find out more about other implicit resources you can reference within SAM
-#   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-#   HelloWorldApi:
-#     Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-#     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-#   HelloWorldFunction:
+  SetupSaveCandlesFromTicks:
+    Description: Function Arn
+    Value: !GetAtt SetupSaveCandlesFromTicks.Arn
+  SaveCandlesFromTicks:
+    Description: Function Arn
+    Value: !GetAtt SaveCandlesFromTicks.Arn

@@ -41,6 +41,7 @@ def setup_save_clean_ticks(
 
 def save_clean_ticks(
     key_raw_ticks: str,
+    **kwargs
 ):
     # Delete any objects which are already there.
     prefix_clean_ticks = convert_key_raw_ticks_to_clean_ticks(
@@ -51,7 +52,7 @@ def save_clean_ticks(
     )
 
     # Load raw ticks
-    data = load_json_data(BUCKET, key_raw_ticks)
+    data = load_json_data(key_raw_ticks)
     
     # Convert raw ticks to clean ticks
     df_clean_ticks = get_clean_ticks(data)
@@ -59,6 +60,7 @@ def save_clean_ticks(
     #Save as parquet
     wr.s3.to_parquet(
         df_clean_ticks,
+        dataset=True,
         path=f"s3://{BUCKET}/{DIR_CLEAN_TICKS}/",
         partition_cols=[
             "symbol",

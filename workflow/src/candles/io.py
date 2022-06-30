@@ -1,3 +1,4 @@
+import awswrangler as wr
 from datetime import datetime, timedelta, date
 
 from src.config import *
@@ -5,13 +6,10 @@ from src.io import *
 from src.utils import * 
 
 def get_matching_keys_candles(
-    prefix: str
+    key: str
 ):
-    return list(get_matching_s3_keys(
-        bucket=BUCKET,
-        prefix=f"{DIR_CANDLES_ROOT}/{prefix}",
-        suffix=".parquet"
-    ))
+    path = f"s3://{BUCKET}/{key}"
+    return wr.s3.list_objects(path)
 
 def get_matching_prefixes_candles_by_frequency(name_dataset: str):
     prefixes = {}
@@ -21,13 +19,7 @@ def get_matching_prefixes_candles_by_frequency(name_dataset: str):
             prefix = f"{DIR_CANDLES_ROOT}/{name_dataset}/symbol={symbol}/frequency={frequency}/"
             prefixes[symbol][frequency] = sorted(
                 get_prefixes_from_keys(
-                    list(
-                        get_matching_s3_keys(
-                            bucket=BUCKET,
-                            prefix=prefix,
-                            suffix=".parquet"
-                        )
-                    )
+                    get_matching_keys_candles(prefix)
                 )
             )
     return prefixes
