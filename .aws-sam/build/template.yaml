@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: 'python3.8
+Description: 'python3.9
 
   Sample SAM Template for mercury-pipeline-metaapi-sam
 
@@ -59,10 +59,10 @@ Resources:
         - app.lambda_handler
       Timeout: 900
       MemorySize: 512
-      ImageUri: pipeline:python3.8-v1
+      ImageUri: pipeline:python3.9-v1
     Metadata:
       DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\workflow
-      DockerTag: python3.8-v1
+      DockerTag: python3.9-v1
       Dockerfile: Dockerfile
       SamResourceId: Pipeline
   LambdaExecutionRole:

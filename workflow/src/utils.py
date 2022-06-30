@@ -29,7 +29,6 @@ async def job_batch_async(
 ):
     results = []
     for i, item in enumerate(batch):
-        print(i)
         result = await func(**item)
         results.append(result)
     return all(results)
