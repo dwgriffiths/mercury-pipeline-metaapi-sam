@@ -1,0 +1,6 @@
+awswrangler
+metaapi-cloud-sdk
+pandas
+pytz
+requests
+s3fs

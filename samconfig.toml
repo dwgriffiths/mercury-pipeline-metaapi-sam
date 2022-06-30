@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "mercury-pipeline-metaapi"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-17x4tdwwosg40"
+s3_prefix = "mercury-pipeline-metaapi"
+region = "eu-west-2"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+image_repositories = ["SetupSaveRawTicks=008739416430.dkr.ecr.eu-west-2.amazonaws.com/mercurypipelinemetaapi1b4ce271/setupsaverawtickseaf2e8d1repo", "SaveRawTicks=008739416430.dkr.ecr.eu-west-2.amazonaws.com/mercurypipelinemetaapi1b4ce271/saverawticks5d276325repo", "SetupSaveCleanTicks=008739416430.dkr.ecr.eu-west-2.amazonaws.com/mercurypipelinemetaapi1b4ce271/setupsavecleanticksfb5e33acrepo", "SaveCleanTicks=008739416430.dkr.ecr.eu-west-2.amazonaws.com/mercurypipelinemetaapi1b4ce271/savecleanticks7e874ae6repo"]
+parameter_overrides = "ProjectName=\"mercury\" Datalake=\"datalake.dgriffiths.io\" BuildTimestamp=\"notimestamp\" MetaAPIKey=\"arn:aws:secretsmanager:eu-west-2:008739416430:secret:metaapi-key-63qzoR\" MetaAPIDemoAccountID=\"arn:aws:secretsmanager:eu-west-2:008739416430:secret:metaapi-account-id-demo-mJYsCi\""

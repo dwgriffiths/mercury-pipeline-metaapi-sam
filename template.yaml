@@ -1,0 +1,187 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  python3.8
+  
+  Sample SAM Template for mercury-pipeline-metaapi-sam
+  
+Parameters:
+  ProjectName:
+    Description: The name of the project that will be prefixed to resource names
+    Type: String
+    Default: mercury
+  Datalake:
+    Description: Name of the datalake bucket
+    Type: String
+    Default: datalake.dgriffiths.io
+  BuildTimestamp:
+    Description: A timestamp to make sure the functions are recreated from scratch
+    Type: String
+    Default: notimestamp
+  MetaAPIKey:
+    Description: The Arn for the MetaAPIKey Secret
+    Type: String
+    Default: arn:aws:secretsmanager:eu-west-2:008739416430:secret:metaapi-key-63qzoR
+  MetaAPIDemoAccountID:
+    Description: The Arn for the MetaAPIDemoAccountID Secret
+    Type: String
+    Default: arn:aws:secretsmanager:eu-west-2:008739416430:secret:metaapi-account-id-demo-mJYsCi
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  StateMachineMain:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/metaapi.json
+      DefinitionSubstitutions:
+        SetupSaveRawTicks: !GetAtt SetupSaveRawTicks.Arn
+        SaveRawTicks: !GetAtt SaveRawTicks.Arn
+        SetupSaveCleanTicks: !GetAtt SetupSaveCleanTicks.Arn
+        SaveCleanTicks: !GetAtt SaveCleanTicks.Arn
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SetupSaveRawTicks
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SaveRawTicks
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SetupSaveCleanTicks
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SaveCleanTicks
+
+  SetupSaveRawTicks:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Role: !GetAtt [ LambdaExecutionRole, Arn ]
+      ImageConfig:
+        Command: [ "app.lambda_setup_save_raw_ticks" ]
+      Timeout: 300
+      MemorySize: 512
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./workflow
+      DockerTag: python3.8-v1
+      
+  SaveRawTicks:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Role: !GetAtt [ LambdaExecutionRole, Arn ]
+      ImageConfig:
+        Command: [ "app.lambda_save_raw_ticks" ]
+      Timeout: 900
+      MemorySize: 512
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./workflow
+      DockerTag: python3.8-v1
+      
+  SetupSaveCleanTicks:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Role: !GetAtt [ LambdaExecutionRole, Arn ]
+      ImageConfig:
+        Command: [ "app.lambda_setup_save_clean_ticks" ]
+      Timeout: 300
+      MemorySize: 512
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./workflow
+      DockerTag: python3.8-v1
+      
+  SaveCleanTicks:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Role: !GetAtt [ LambdaExecutionRole, Arn ]
+      ImageConfig:
+        Command: [ "app.lambda_save_clean_ticks" ]
+      Timeout: 900
+      MemorySize: 512
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./workflow
+      DockerTag: python3.8-v1
+      
+  #################
+  ##### ROLES #####
+  #################
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${AWS::StackName}-LambdaExecutionRole"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub "arn:aws:s3:::${Datalake}"
+                  - !Sub "arn:aws:s3:::${Datalake}/*"
+              - Effect: Allow
+                Action:
+                  - "secretsmanager:*" # Allowing all for now
+                Resource:
+                  - !Ref MetaAPIKey 
+                  - !Ref MetaAPIDemoAccountID
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+Outputs:
+  SetupSaveRawTicks:
+    Description: Function Arn
+    Value: !GetAtt SetupSaveRawTicks.Arn
+  SaveRawTicks:
+    Description: Function Arn
+    Value: !GetAtt SaveRawTicks.Arn
+  SetupSaveCleanTicks:
+    Description: Function Arn
+    Value: !GetAtt SetupSaveCleanTicks.Arn
+  SaveCleanTicks:
+    Description: Function Arn
+    Value: !GetAtt SaveCleanTicks.Arn
+    
+    
+    
+#     Events:
+#         HelloWorld:
+#           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+#           Properties:
+#             Path: /hello
+#             Method: get
+#     Metadata:
+#       Dockerfile: Dockerfile
+#       DockerContext: ./hello_world
+#       DockerTag: {{cookiecutter.runtime}}-v1
+
+# Outputs:
+#   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+#   # Find out more about other implicit resources you can reference within SAM
+#   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+#   HelloWorldApi:
+#     Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+#     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+#   HelloWorldFunction:
