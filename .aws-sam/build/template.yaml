@@ -31,50 +31,15 @@ Resources:
     Properties:
       DefinitionUri: ..\..\statemachine\metaapi.json
       DefinitionSubstitutions:
-        SetupSaveRawTicks:
+        Pipeline:
           Fn::GetAtt:
-          - SetupSaveRawTicks
-          - Arn
-        SaveRawTicks:
-          Fn::GetAtt:
-          - SaveRawTicks
-          - Arn
-        SetupSaveCleanTicks:
-          Fn::GetAtt:
-          - SetupSaveCleanTicks
-          - Arn
-        SaveCleanTicks:
-          Fn::GetAtt:
-          - SaveCleanTicks
-          - Arn
-        SetupSaveCandlesFromTicks:
-          Fn::GetAtt:
-          - SetupSaveCandlesFromTicks
-          - Arn
-        SaveCandlesFromTicks:
-          Fn::GetAtt:
-          - SaveCandlesFromTicks
+          - Pipeline
           - Arn
       Policies:
       - LambdaInvokePolicy:
           FunctionName:
-            Ref: SetupSaveRawTicks
-      - LambdaInvokePolicy:
-          FunctionName:
-            Ref: SaveRawTicks
-      - LambdaInvokePolicy:
-          FunctionName:
-            Ref: SetupSaveCleanTicks
-      - LambdaInvokePolicy:
-          FunctionName:
-            Ref: SaveCleanTicks
-      - LambdaInvokePolicy:
-          FunctionName:
-            Ref: SetupSaveCandlesFromTicks
-      - LambdaInvokePolicy:
-          FunctionName:
-            Ref: SaveCandlesFromTicks
-  SetupSaveRawTicks:
+            Ref: Pipeline
+  Pipeline:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
@@ -84,110 +49,15 @@ Resources:
         - Arn
       ImageConfig:
         Command:
-        - app.lambda_setup_save_raw_ticks
-      Timeout: 300
-      MemorySize: 512
-      ImageUri: setupsaverawticks:python3.8-v1
-    Metadata:
-      DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\workflow
-      DockerTag: python3.8-v1
-      Dockerfile: Dockerfile
-      SamResourceId: SetupSaveRawTicks
-  SaveRawTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role:
-        Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
-      ImageConfig:
-        Command:
-        - app.lambda_save_raw_ticks
+        - app.lambda_handler
       Timeout: 900
       MemorySize: 512
-      ImageUri: setupsaverawticks:python3.8-v1
+      ImageUri: pipeline:python3.8-v1
     Metadata:
       DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\workflow
       DockerTag: python3.8-v1
       Dockerfile: Dockerfile
-      SamResourceId: SaveRawTicks
-  SetupSaveCleanTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role:
-        Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
-      ImageConfig:
-        Command:
-        - app.lambda_setup_save_clean_ticks
-      Timeout: 300
-      MemorySize: 512
-      ImageUri: setupsaverawticks:python3.8-v1
-    Metadata:
-      DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\workflow
-      DockerTag: python3.8-v1
-      Dockerfile: Dockerfile
-      SamResourceId: SetupSaveCleanTicks
-  SaveCleanTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role:
-        Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
-      ImageConfig:
-        Command:
-        - app.lambda_save_clean_ticks
-      Timeout: 900
-      MemorySize: 512
-      ImageUri: setupsaverawticks:python3.8-v1
-    Metadata:
-      DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\workflow
-      DockerTag: python3.8-v1
-      Dockerfile: Dockerfile
-      SamResourceId: SaveCleanTicks
-  SetupSaveCandlesFromTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role:
-        Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
-      ImageConfig:
-        Command:
-        - app.lambda_setup_save_candles_from_ticks
-      Timeout: 300
-      MemorySize: 512
-      ImageUri: setupsaverawticks:python3.8-v1
-    Metadata:
-      DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\workflow
-      DockerTag: python3.8-v1
-      Dockerfile: Dockerfile
-      SamResourceId: SetupSaveCandlesFromTicks
-  SaveCandlesFromTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role:
-        Fn::GetAtt:
-        - LambdaExecutionRole
-        - Arn
-      ImageConfig:
-        Command:
-        - app.lambda_save_candles_from_ticks
-      Timeout: 900
-      MemorySize: 512
-      ImageUri: setupsaverawticks:python3.8-v1
-    Metadata:
-      DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\workflow
-      DockerTag: python3.8-v1
-      Dockerfile: Dockerfile
-      SamResourceId: SaveCandlesFromTicks
+      SamResourceId: Pipeline
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -228,40 +98,3 @@ Resources:
             - logs:CreateLogStream
             - logs:PutLogEvents
             Resource: '*'
-Outputs:
-  SetupSaveRawTicks:
-    Description: Function Arn
-    Value:
-      Fn::GetAtt:
-      - SetupSaveRawTicks
-      - Arn
-  SaveRawTicks:
-    Description: Function Arn
-    Value:
-      Fn::GetAtt:
-      - SaveRawTicks
-      - Arn
-  SetupSaveCleanTicks:
-    Description: Function Arn
-    Value:
-      Fn::GetAtt:
-      - SetupSaveCleanTicks
-      - Arn
-  SaveCleanTicks:
-    Description: Function Arn
-    Value:
-      Fn::GetAtt:
-      - SaveCleanTicks
-      - Arn
-  SetupSaveCandlesFromTicks:
-    Description: Function Arn
-    Value:
-      Fn::GetAtt:
-      - SetupSaveCandlesFromTicks
-      - Arn
-  SaveCandlesFromTicks:
-    Description: Function Arn
-    Value:
-      Fn::GetAtt:
-      - SaveCandlesFromTicks
-      - Arn

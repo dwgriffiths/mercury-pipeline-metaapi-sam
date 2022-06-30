@@ -7,8 +7,9 @@ from src.ticks.raw.io import *
 from src.ticks.raw.get import get_raw_ticks
 
 def setup_save_raw_ticks(
-    stop: bool,
-    batch_size: int
+    stop: bool = None,
+    batch_size: int = None,
+    **kwargs
 ):
     stop = True if stop is None else stop
     batch_size = 12 if batch_size is None else max(min(batch_size, 12), 1)
@@ -43,7 +44,8 @@ def setup_save_raw_ticks(
 async def save_raw_ticks(
     symbol: str,
     datetimestr_from: str,
-    datetimestr_to: str
+    datetimestr_to: str,
+    **kwargs
 ):
     prefix = get_prefix_raw_ticks(symbol, datetimestr_from)
     if wr.s3.does_object_exist(f"s3://{BUCKET}/{prefix}"):

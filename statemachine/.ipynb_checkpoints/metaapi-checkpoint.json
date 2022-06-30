@@ -5,14 +5,18 @@
     "SetupSaveRawTicks": {
       "Next": "ChoiceSaveRawTicks",
       "Type": "Task",
-      "Resource": "${SetupSaveRawTicks}", 
-      "ResultPath": "$.ResultSetupSaveRawTicks"
+      "Resource": "${Pipeline}",
+      "Parameters": {
+          "function": "setup_save_raw_ticks",
+          "kwargs.$": "$"
+      },
+      "ResultPath": "$.SaveRawTicks.inputs"
     },
     "ChoiceSaveRawTicks": {
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.ResultSetupSaveRawTicks.n_items",
+          "Variable": "$.SaveRawTicks.inputs.n_items",
           "NumericEquals": 0,
           "Next": "SetupSaveCleanTicks"
         }
@@ -23,10 +27,11 @@
       "Next": "SetupSaveRawTicks",
       "Type": "Map",
       "MaxConcurrency": 1,
-      "ItemsPath": "$.ResultSetupSaveRawTicks.batches",
-      "ResultPath": "$.ResultSaveRawTicks",
+      "ItemsPath": "$.SaveRawTicks.inputs.batches",
+      "ResultPath": "$.SaveRawTicks.results",
       "Parameters": {
-        "batch.$": "$$.Map.Item.Value"
+        "function": "save_raw_ticks",
+        "kwargs.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveRawTicks",
@@ -34,7 +39,7 @@
           "SaveRawTicks": {
             "End": true,
             "Type": "Task",
-            "Resource": "${SaveRawTicks}"
+            "Resource": "${Pipeline}"
           }
         }
       } 
@@ -42,16 +47,20 @@
     "SetupSaveCleanTicks": {
       "Next": "ChoiceSaveCleanTicks",
       "Type": "Task",
-      "Resource": "${SetupSaveCleanTicks}",
-      "ResultPath": "$.ResultSetupSaveCleanTicks",
+      "Resource": "${Pipeline}",
+      "Parameters": {
+          "function": "setup_save_clean_ticks",
+          "kwargs.$": "$"
+      },
+      "ResultPath": "$.SaveCleanTicks.inputs",
     },
     "ChoiceSaveCleanTicks": {
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.ResultSetupSaveCleanTicks.n_items",
+          "Variable": "$.SaveCleanTicks.inputs.n_items",
           "NumericEquals": 0,
-          "Next": "Success"
+          "Next": "SetupSaveCandlesFromTicks"
         }
       ],
       "Default": "MapSaveCleanTicks"
@@ -60,10 +69,11 @@
       "Next": "SetupSaveCleanTicks",
       "Type": "Map",
       "MaxConcurrency": 0,
-      "ItemsPath": "$.ResultSetupSaveCleanTicks.batches",
-      "ResultPath": "$.ResultSaveCleanTicks",
+      "ItemsPath": "$.SaveCleanTicks.inputs.batches",
+      "ResultPath": "$.SaveCleanTicks.results",
       "Parameters": {
-        "batch.$": "$$.Map.Item.Value"
+        "function": "save_clean_ticks",
+        "kwargs.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCleanTicks",
@@ -71,7 +81,7 @@
           "SaveCleanTicks": {
             "End": true,
             "Type": "Task",
-            "Resource": "${SaveCleanTicks}"
+            "Resource": "${Pipeline}"
           }
         }
       } 
@@ -79,14 +89,18 @@
     "SetupSaveCandlesFromTicks": {
       "Next": "ChoiceSaveCandlesFromTicks",
       "Type": "Task",
-      "Resource": "${SetupSaveCandlesFromTicks}",
-      "ResultPath": "$.ResultSetupSaveCandlesFromTicks",
+      "Resource": "${Pipeline}",
+      "Parameters": {
+          "function": "setup_save_candles_from_ticks",
+          "kwargs.$": "$"
+      },
+      "ResultPath": "$.SaveCandlesFromTicks.inputs",
     },
     "ChoiceSaveCandlesFromTicks": {
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.ResultSetupSaveCandlesFromTicks.n_items",
+          "Variable": "$.SaveCandlesFromTicks.inputs.n_items",
           "NumericEquals": 0,
           "Next": "Success"
         }
@@ -97,10 +111,11 @@
       "Next": "SetupSaveCandlesFromTicks",
       "Type": "Map",
       "MaxConcurrency": 0,
-      "ItemsPath": "$.ResultSetupSaveCandlesFromTicks.batches",
-      "ResultPath": "$.ResultSaveCandlesFromTicks",
+      "ItemsPath": "$.SaveCandlesFromTicks.inputs.batches",
+      "ResultPath": "$.SaveCandlesFromTicks.results",
       "Parameters": {
-        "batch.$": "$$.Map.Item.Value"
+        "function": "save_candles_from_ticks",
+        "kwargs.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCandlesFromTicks",
@@ -108,7 +123,7 @@
           "SaveCandlesFromTicks": {
             "End": true,
             "Type": "Task",
-            "Resource": "${SaveCandlesFromTicks}"
+            "Resource": "${Pipeline}"
           }
         }
       } 

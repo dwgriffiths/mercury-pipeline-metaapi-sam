@@ -10,8 +10,9 @@ from src.candles.io import *
 from src.candles.from_ticks.get import get_candles_from_ticks
     
 def setup_save_candles_from_ticks(
-    overwrite: bool,
-    batch_size: int
+    overwrite: bool = None,
+    batch_size: int = None,
+    **kwargs
 ):
     overwrite = False if overwrite is None else overwrite
     batch_size = 48 if batch_size is None else max(min(batch_size, 48), 1)
@@ -52,7 +53,8 @@ def setup_save_candles_from_ticks(
 def save_candles_from_ticks(
     prefix_clean_ticks: str,
     frequencies: list,
-    name_dataset: str
+    name_dataset: str,
+    **kwargs
 ):
     for frequency in frequencies:
         

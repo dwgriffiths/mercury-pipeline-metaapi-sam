@@ -8,51 +8,43 @@ from src.ticks.clean.save import setup_save_clean_ticks, save_clean_ticks
 from src.candles.from_ticks.save import setup_save_candles_from_ticks, save_candles_from_ticks
 from src.candles.transform.setup.lookback import setup_candles_lookback
 
-def lambda_setup_save_raw_ticks(event, context):
-    stop = event.get("stop")
-    batch_size = event.get("batch_size")
-    result = setup_save_raw_ticks(stop, batch_size)
-    return result
-
-def lambda_save_raw_ticks(event, context):
-    batch = event.get("batch")
-    result = job_batch(
-        save_raw_ticks,
-        batch,
-        is_async=True
-    )
-    return result
-
-def lambda_setup_save_clean_ticks(event, context):
-    overwrite = event.get("overwrite")
-    batch_size = event.get("batch_size")
-    prev = event.get("ResultSaveCleanTicks")
-    overwrite = overwrite if prev is None else False
-    
-    result = setup_save_clean_ticks(overwrite, batch_size)
-    return result
-
-def lambda_save_clean_ticks(event, context):
-    batch = event.get("batch")
-    result = job_batch(
-        save_clean_ticks,
-        batch,
-    )
-    return result
-
-def lambda_setup_save_candles_from_ticks(event, context):
-    overwrite = event.get("overwrite")
-    batch_size = event.get("batch_size")
-    prev = event.get("ResultSaveCandlesFromTicks")
-    overwrite = False if prev is not None else overwrite
-    
-    result = setup_save_candles_from_ticks(overwrite, batch_size)
-    return result
-
-def lambda_save_candles_from_ticks(event, context):
-    batch = event.get("batch")
-    result = job_batch(
-        save_candles_from_ticks,
-        batch,
-    )
-    return result
+functions = {
+    "setup_save_raw_ticks": {
+        "function": setup_save_raw_ticks,
+        "batch": False,
+    },
+    "save_raw_ticks": {
+        "function": save_raw_ticks,
+        "batch": True,
+    },
+    "setup_save_clean_ticks": {
+        "function": setup_save_clean_ticks,
+        "batch": False,
+    },
+    "save_clean_ticks": {
+        "function": save_clean_ticks,
+        "batch": True,
+    },
+    "setup_save_candles_from_ticks": {
+        "function": setup_save_candles_from_ticks,
+        "batch": False,
+    },
+    "save_candles_from_ticks": {
+        "function": save_candles_from_ticks,
+        "batch": True,
+    }
+}
+def lambda_handler(event, context):
+    function_name = event.get("function")
+    kwargs = event.get("kwargs")
+    assert function_name
+    assert function_name in functions
+    kwargs = kwargs if kwargs else {}
+    function = functions[function_name]["function"]
+    batch = functions[function_name]["batch"]
+    if batch:
+        return job_batch(
+            function,
+            kwargs,
+        )
+    return function(**kwargs)

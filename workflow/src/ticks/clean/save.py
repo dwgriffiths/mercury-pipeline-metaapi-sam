@@ -9,12 +9,15 @@ from src.ticks.clean.io import *
 from src.ticks.clean.get import get_clean_ticks
 
 def setup_save_clean_ticks(
-    overwrite: bool,
-    batch_size: int
+    overwrite: bool = None,
+    batch_size: int = None,
+    prev: list = None,
+    **kwargs
 ):
     overwrite = False if overwrite is None else overwrite
     batch_size = 48 if batch_size is None else max(min(batch_size, 48), 1)
-        
+    overwrite = overwrite if prev is None else False
+    
     keys_raw_ticks = get_matching_keys_raw_ticks()
     keys_clean_ticks_saved = get_matching_keys_clean_ticks()
     

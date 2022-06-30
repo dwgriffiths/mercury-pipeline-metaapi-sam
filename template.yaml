@@ -33,110 +33,25 @@ Resources:
     Properties:
       DefinitionUri: statemachine/metaapi.json
       DefinitionSubstitutions:
-        SetupSaveRawTicks: !GetAtt SetupSaveRawTicks.Arn
-        SaveRawTicks: !GetAtt SaveRawTicks.Arn
-        SetupSaveCleanTicks: !GetAtt SetupSaveCleanTicks.Arn
-        SaveCleanTicks: !GetAtt SaveCleanTicks.Arn
-        SetupSaveCandlesFromTicks: !GetAtt SetupSaveCandlesFromTicks.Arn
-        SaveCandlesFromTicks: !GetAtt SaveCandlesFromTicks.Arn
+        Pipeline: !GetAtt Pipeline.Arn
       Policies:
         - LambdaInvokePolicy:
-            FunctionName: !Ref SetupSaveRawTicks
-        - LambdaInvokePolicy:
-            FunctionName: !Ref SaveRawTicks
-        - LambdaInvokePolicy:
-            FunctionName: !Ref SetupSaveCleanTicks
-        - LambdaInvokePolicy:
-            FunctionName: !Ref SaveCleanTicks
-        - LambdaInvokePolicy:
-            FunctionName: !Ref SetupSaveCandlesFromTicks
-        - LambdaInvokePolicy:
-            FunctionName: !Ref SaveCandlesFromTicks
+            FunctionName: !Ref Pipeline
+            
+  Pipeline:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Role: !GetAtt [ LambdaExecutionRole, Arn ]
+      ImageConfig:
+        Command: [ "app.lambda_handler" ]
+      Timeout: 900
+      MemorySize: 512
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./workflow
+      DockerTag: python3.8-v1
 
-  SetupSaveRawTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role: !GetAtt [ LambdaExecutionRole, Arn ]
-      ImageConfig:
-        Command: [ "app.lambda_setup_save_raw_ticks" ]
-      Timeout: 300
-      MemorySize: 512
-    Metadata:
-      Dockerfile: Dockerfile
-      DockerContext: ./workflow
-      DockerTag: python3.8-v1
-      
-  SaveRawTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role: !GetAtt [ LambdaExecutionRole, Arn ]
-      ImageConfig:
-        Command: [ "app.lambda_save_raw_ticks" ]
-      Timeout: 900
-      MemorySize: 512
-    Metadata:
-      Dockerfile: Dockerfile
-      DockerContext: ./workflow
-      DockerTag: python3.8-v1
-      
-  SetupSaveCleanTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role: !GetAtt [ LambdaExecutionRole, Arn ]
-      ImageConfig:
-        Command: [ "app.lambda_setup_save_clean_ticks" ]
-      Timeout: 300
-      MemorySize: 512
-    Metadata:
-      Dockerfile: Dockerfile
-      DockerContext: ./workflow
-      DockerTag: python3.8-v1
-      
-  SaveCleanTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role: !GetAtt [ LambdaExecutionRole, Arn ]
-      ImageConfig:
-        Command: [ "app.lambda_save_clean_ticks" ]
-      Timeout: 900
-      MemorySize: 512
-    Metadata:
-      Dockerfile: Dockerfile
-      DockerContext: ./workflow
-      DockerTag: python3.8-v1
-      
-  SetupSaveCandlesFromTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role: !GetAtt [ LambdaExecutionRole, Arn ]
-      ImageConfig:
-        Command: [ "app.lambda_setup_save_candles_from_ticks" ]
-      Timeout: 300
-      MemorySize: 512
-    Metadata:
-      Dockerfile: Dockerfile
-      DockerContext: ./workflow
-      DockerTag: python3.8-v1
-      
-  SaveCandlesFromTicks:
-    Type: AWS::Serverless::Function
-    Properties:
-      PackageType: Image
-      Role: !GetAtt [ LambdaExecutionRole, Arn ]
-      ImageConfig:
-        Command: [ "app.lambda_save_candles_from_ticks" ]
-      Timeout: 900
-      MemorySize: 512
-    Metadata:
-      Dockerfile: Dockerfile
-      DockerContext: ./workflow
-      DockerTag: python3.8-v1
-      
   #################
   ##### ROLES #####
   #################
@@ -179,23 +94,3 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: "*"
-
-Outputs:
-  SetupSaveRawTicks:
-    Description: Function Arn
-    Value: !GetAtt SetupSaveRawTicks.Arn
-  SaveRawTicks:
-    Description: Function Arn
-    Value: !GetAtt SaveRawTicks.Arn
-  SetupSaveCleanTicks:
-    Description: Function Arn
-    Value: !GetAtt SetupSaveCleanTicks.Arn
-  SaveCleanTicks:
-    Description: Function Arn
-    Value: !GetAtt SaveCleanTicks.Arn
-  SetupSaveCandlesFromTicks:
-    Description: Function Arn
-    Value: !GetAtt SetupSaveCandlesFromTicks.Arn
-  SaveCandlesFromTicks:
-    Description: Function Arn
-    Value: !GetAtt SaveCandlesFromTicks.Arn
