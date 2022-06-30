@@ -22,6 +22,8 @@ def get_matching_prefixes_raw_ticks():
     ]
 
 def save_raw_ticks_to_json(data: dict):
+    symbol = data["symbol"]
+    datetimestr_from = data["datetimeutc_from"]
     n_ticks = data["n"]
     key = f"{DIR_RAW_TICKS}/{symbol}/ticks_{datetimestr_from}_{n_ticks}.json"
     save_json_data(BUCKET, key, data)

@@ -28,13 +28,15 @@ async def job_batch_async(
     batch: list
 ):
     results = []
-    for item in batch:
-        results.append(await func(**item))
+    for i, item in enumerate(batch):
+        print(i)
+        result = await func(**item)
+        results.append(result)
     return all(results)
 
 def job_batch(
     func,
-    batch: list,
+    batch: list = [],
     is_async: bool = False
 ):
     if is_async:
