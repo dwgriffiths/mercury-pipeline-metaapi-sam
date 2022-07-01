@@ -45,7 +45,10 @@ def job_batch(
         )
     results = []
     for item in batch:
+        # tic = datetime.now()
         results.append(func(**item))
+        # toc = datetime.now()
+        # print((toc-tic).total_seconds())
     return all(results)
 
 

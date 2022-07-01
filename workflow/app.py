@@ -11,42 +11,42 @@ from src.candles.transform.save import setup_save_candles_transformed, save_cand
 functions = {
     "setup_save_raw_ticks": {
         "function": setup_save_raw_ticks,
-        "batch": False,
+        "is_batch": False,
         "is_async": False,
     },
     "save_raw_ticks": {
         "function": save_raw_ticks,
-        "batch": True,
+        "is_batch": True,
         "is_async": True,
     },
     "setup_save_clean_ticks": {
         "function": setup_save_clean_ticks,
-        "batch": False,
+        "is_batch": False,
         "is_async": False,
     },
     "save_clean_ticks": {
         "function": save_clean_ticks,
-        "batch": True,
+        "is_batch": True,
         "is_async": False,
     },
     "setup_save_candles_from_ticks": {
         "function": setup_save_candles_from_ticks,
-        "batch": False,
+        "is_batch": False,
         "is_async": False,
     },
     "save_candles_from_ticks": {
         "function": save_candles_from_ticks,
-        "batch": True,
+        "is_batch": True,
         "is_async": False,
     },
     "setup_save_candles_transformed": {
         "function": setup_save_candles_transformed,
-        "batch": False,
+        "is_batch": False,
         "is_async": False,
     },
     "save_candles_transformed": {
         "function": save_candles_transformed,
-        "batch": True,
+        "is_batch": True,
         "is_async": False,
     },
 }
@@ -55,14 +55,20 @@ def lambda_handler(event, context):
     kwargs = event.get("kwargs")
     assert function_name
     assert function_name in functions
-    kwargs = kwargs if kwargs else {}
+    
+    kwargs_extra = {k:v for k, v in event.items() if k not in ["function", "kwargs"]}
+    if not kwargs:
+        kwargs = kwargs_extra
+    else:
+        kwargs.update(kwargs_extra)
+        
     function = functions[function_name]["function"]
-    batch = functions[function_name]["batch"]
+    is_batch = functions[function_name]["is_batch"]
     is_async = functions[function_name]["is_async"]
-    if batch:
+    if is_batch:
         return job_batch(
             function,
-            kwargs,
-            is_async
+            is_async=is_async,
+            **kwargs,
         )
     return function(**kwargs)

@@ -31,7 +31,7 @@
       "ResultPath": "$.SaveRawTicks.results",
       "Parameters": {
         "function": "save_raw_ticks",
-        "kwargs.$": "$$.Map.Item.Value"
+        "batch.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveRawTicks",
@@ -73,7 +73,7 @@
       "ResultPath": "$.SaveCleanTicks.results",
       "Parameters": {
         "function": "save_clean_ticks",
-        "kwargs.$": "$$.Map.Item.Value"
+        "batch.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCleanTicks",
@@ -102,7 +102,7 @@
         {
           "Variable": "$.SaveCandlesFromTicks.inputs.n_items",
           "NumericEquals": 0,
-          "Next": "Success"
+          "Next": "SetupSaveCandlesFFill"
         }
       ],
       "Default": "MapSaveCandlesFromTicks"
@@ -115,12 +115,57 @@
       "ResultPath": "$.SaveCandlesFromTicks.results",
       "Parameters": {
         "function": "save_candles_from_ticks",
-        "kwargs.$": "$$.Map.Item.Value"
+        "batch.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCandlesFromTicks",
         "States": {
           "SaveCandlesFromTicks": {
+            "End": true,
+            "Type": "Task",
+            "Resource": "${Pipeline}"
+          }
+        }
+      }
+    },
+    "SetupSaveCandlesFFill": {
+      "Next": "ChoiceSaveCandlesFFill",
+      "Type": "Task",
+      "Resource": "${Pipeline}",
+      "Parameters": {
+          "function": "setup_save_candles_transformed",
+          "name_dataset_in": "from_ticks",
+          "name_dataset_out": "ffill",
+          "function_names": ["ffill"],
+          "kwargs.$": "$"
+      },
+      "ResultPath": "$.SaveCandlesFFill.ffill.inputs",
+    },
+    "ChoiceSaveCandlesFFill": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.SaveCandlesFFill.ffill.inputs.n_items",
+          "NumericEquals": 0,
+          "Next": "Success"
+        }
+      ],
+      "Default": "MapSaveCandlesFFill"
+    },
+    "MapSaveCandlesFFill": {
+      "Next": "SetupSaveCandlesFFill",
+      "Type": "Map",
+      "MaxConcurrency": 0,
+      "ItemsPath": "$.SaveCandlesFFill.ffill.inputs.batches",
+      "ResultPath": "$.SaveCandlesFFill.ffill.results",
+      "Parameters": {
+        "function": "save_candles_transformed",
+        "batch.$": "$$.Map.Item.Value"
+      },
+      "Iterator": {
+        "StartAt": "SaveCandlesFFill",
+        "States": {
+          "SaveCandlesFFill": {
             "End": true,
             "Type": "Task",
             "Resource": "${Pipeline}"

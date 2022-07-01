@@ -24,7 +24,7 @@ def setup_save_candles_from_ticks(
     keys_candles_saved = get_matching_keys_candles(name_dataset)
     
     if overwrite:
-        delete_objects(keys_candles_saved)
+        wr.s3.delete_objects(keys_candles_saved)
         keys_candles_saved = []
         
     prefixes_clean_ticks = get_prefixes_from_keys(keys_clean_ticks)

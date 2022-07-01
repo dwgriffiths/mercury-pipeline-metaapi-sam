@@ -2,7 +2,7 @@ from collections import OrderedDict
 from datetime import datetime, timedelta, date
 
 SYMBOLS = ["GBPUSD", "EURUSD"]
-DATETIMEUTC_FROM = datetime(2021, 12, 30, 0, 0, 0)
+DATETIMEUTC_FROM = datetime(2021, 12, 28, 0, 0, 0)
 DATETIMEUTC_TO = (datetime.utcnow()).replace(hour=0, minute=0, second=0, microsecond=0)
 
 DATETIME_FORMAT = "%Y%m%d%H%M%S%f"
