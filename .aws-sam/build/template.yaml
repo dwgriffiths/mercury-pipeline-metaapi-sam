@@ -65,6 +65,15 @@ Resources:
       DockerTag: python3.9-v1
       Dockerfile: Dockerfile
       SamResourceId: Pipeline
+  PipelineTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: Number
+      ProvisionedThroughput:
+        ReadCapacityUnits: 10000
+        WriteCapacityUnits: 1
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -99,6 +108,23 @@ Resources:
             Resource:
             - Ref: MetaAPIKey
             - Ref: MetaAPIDemoAccountID
+          - Effect: Allow
+            Action:
+            - dynamodb:BatchGet*
+            - dynamodb:DescribeStream
+            - dynamodb:DescribeTable
+            - dynamodb:Get*
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:BatchWrite*
+            - dynamodb:CreateTable
+            - dynamodb:Delete*
+            - dynamodb:Update*
+            - dynamodb:PutItem
+            Resource:
+              Fn::GetAtt:
+              - PipelineTable
+              - Arn
           - Effect: Allow
             Action:
             - logs:CreateLogGroup

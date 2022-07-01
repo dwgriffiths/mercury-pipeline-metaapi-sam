@@ -1,3 +1,4 @@
+import awswrangler as wr
 from datetime import datetime, timedelta, date
 
 from src.config import *
@@ -39,6 +40,10 @@ def setup_save_raw_ticks(
                 "datetimestr_to": dstr_to,
             })
     items = sorted(items, key=lambda x: x.get("datetimestr_from"), reverse=True)
+    ids = [x for x in range(len(items))]
+    items = [x | {"id":i} for i, x in enumerate(items)]
+    wr.dynamodb.put_items(items, TABLE_PIPELINE)
+    return ids
     return batch_items(items, batch_size)
     
 async def save_raw_ticks(
@@ -60,6 +65,8 @@ async def save_raw_ticks(
     
     # Save as json
     save_raw_ticks_to_json(data)
+    
+    # Delete 
     return True
     
     

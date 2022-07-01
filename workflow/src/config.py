@@ -12,6 +12,8 @@ DIR_RAW_TICKS = "projects/mercury/data/raw/ticks"
 DIR_CLEAN_TICKS = "projects/mercury/data/clean/ticks"
 DIR_CANDLES_ROOT = "projects/mercury/data/clean/candles"
 
+TABLE_PIPELINE = "mercury-pipeline-metaapi-PipelineTable-T7XW90KNN0Q5"
+
 MAX_ITERATIONS = 336
 
 # Frequency order
