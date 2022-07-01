@@ -3,35 +3,24 @@
   "StartAt": "SetupSaveRawTicks",
   "States": {
     "SetupSaveRawTicks": {
-      "Next": "ChoiceSaveRawTicks",
+      "Next": "MapSaveRawTicks",
       "Type": "Task",
       "Resource": "${Pipeline}",
       "Parameters": {
           "function": "setup_save_raw_ticks",
-          "kwargs.$": "$"
+          "stop.$": "$.['stop', 'placeholder']"
       },
-      "ResultPath": "$.SaveRawTicks.inputs"
-    },
-    "ChoiceSaveRawTicks": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.SaveRawTicks.inputs.n_items",
-          "NumericEquals": 0,
-          "Next": "SetupSaveCleanTicks"
-        }
-      ],
-      "Default": "MapSaveRawTicks"
+      "ResultPath": "$.SaveRawTicks.batch_ids"
     },
     "MapSaveRawTicks": {
-      "Next": "SetupSaveRawTicks",
+      "Next": "SetupSaveCleanTicks",
       "Type": "Map",
       "MaxConcurrency": 1,
-      "ItemsPath": "$.SaveRawTicks.inputs.batches",
+      "ItemsPath": "$.SaveRawTicks.batch_ids",
       "ResultPath": "$.SaveRawTicks.results",
       "Parameters": {
         "function": "save_raw_ticks",
-        "batch.$": "$$.Map.Item.Value"
+        "batch_id.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveRawTicks",
@@ -45,35 +34,24 @@
       } 
     },
     "SetupSaveCleanTicks": {
-      "Next": "ChoiceSaveCleanTicks",
+      "Next": "MapSaveCleanTicks",
       "Type": "Task",
       "Resource": "${Pipeline}",
       "Parameters": {
           "function": "setup_save_clean_ticks",
-          "kwargs.$": "$"
+          "overwrite.$": "$.['overwrite', 'placeholder']"
       },
-      "ResultPath": "$.SaveCleanTicks.inputs",
-    },
-    "ChoiceSaveCleanTicks": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.SaveCleanTicks.inputs.n_items",
-          "NumericEquals": 0,
-          "Next": "SetupSaveCandlesFromTicks"
-        }
-      ],
-      "Default": "MapSaveCleanTicks"
+      "ResultPath": "$.SaveCleanTicks.batch_ids"
     },
     "MapSaveCleanTicks": {
-      "Next": "SetupSaveCleanTicks",
+      "Next": "SetupSaveCandlesFromTicks",
       "Type": "Map",
-      "MaxConcurrency": 0,
-      "ItemsPath": "$.SaveCleanTicks.inputs.batches",
+      "MaxConcurrency": 10000,
+      "ItemsPath": "$.SaveCleanTicks.batch_ids",
       "ResultPath": "$.SaveCleanTicks.results",
       "Parameters": {
         "function": "save_clean_ticks",
-        "batch.$": "$$.Map.Item.Value"
+        "batch_id.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCleanTicks",
@@ -87,35 +65,24 @@
       } 
     },
     "SetupSaveCandlesFromTicks": {
-      "Next": "ChoiceSaveCandlesFromTicks",
+      "Next": "MapSaveCandlesFromTicks",
       "Type": "Task",
       "Resource": "${Pipeline}",
       "Parameters": {
           "function": "setup_save_candles_from_ticks",
-          "kwargs.$": "$"
+          "overwrite.$": "$.['overwrite', 'placeholder']"
       },
-      "ResultPath": "$.SaveCandlesFromTicks.inputs",
-    },
-    "ChoiceSaveCandlesFromTicks": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.SaveCandlesFromTicks.inputs.n_items",
-          "NumericEquals": 0,
-          "Next": "SetupSaveCandlesFFill"
-        }
-      ],
-      "Default": "MapSaveCandlesFromTicks"
+      "ResultPath": "$.SaveCandlesFromTicks.batch_ids"
     },
     "MapSaveCandlesFromTicks": {
-      "Next": "SetupSaveCandlesFromTicks",
+      "Next": "SetupSaveCandlesFFill",
       "Type": "Map",
-      "MaxConcurrency": 0,
-      "ItemsPath": "$.SaveCandlesFromTicks.inputs.batches",
+      "MaxConcurrency": 10000,
+      "ItemsPath": "$.SaveCandlesFromTicks.batch_ids",
       "ResultPath": "$.SaveCandlesFromTicks.results",
       "Parameters": {
         "function": "save_candles_from_ticks",
-        "batch.$": "$$.Map.Item.Value"
+        "batch_id.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCandlesFromTicks",
@@ -126,10 +93,10 @@
             "Resource": "${Pipeline}"
           }
         }
-      }
+      } 
     },
     "SetupSaveCandlesFFill": {
-      "Next": "ChoiceSaveCandlesFFill",
+      "Next": "MapSaveCandlesFFill",
       "Type": "Task",
       "Resource": "${Pipeline}",
       "Parameters": {
@@ -137,30 +104,19 @@
           "name_dataset_in": "from_ticks",
           "name_dataset_out": "ffill",
           "function_names": ["ffill"],
-          "kwargs.$": "$"
+          "overwrite.$": "$.['overwrite', 'placeholder']"
       },
-      "ResultPath": "$.SaveCandlesFFill.ffill.inputs",
-    },
-    "ChoiceSaveCandlesFFill": {
-      "Type": "Choice",
-      "Choices": [
-        {
-          "Variable": "$.SaveCandlesFFill.ffill.inputs.n_items",
-          "NumericEquals": 0,
-          "Next": "Success"
-        }
-      ],
-      "Default": "MapSaveCandlesFFill"
+      "ResultPath": "$.SaveCandlesFFill.batch_ids"
     },
     "MapSaveCandlesFFill": {
-      "Next": "SetupSaveCandlesFFill",
+      "End": true,
       "Type": "Map",
-      "MaxConcurrency": 0,
-      "ItemsPath": "$.SaveCandlesFFill.ffill.inputs.batches",
-      "ResultPath": "$.SaveCandlesFFill.ffill.results",
+      "MaxConcurrency": 10000,
+      "ItemsPath": "$.SaveCandlesFFill.batch_ids",
+      "ResultPath": "$.SaveCandlesFFill.results",
       "Parameters": {
         "function": "save_candles_transformed",
-        "batch.$": "$$.Map.Item.Value"
+        "batch_id.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCandlesFFill",
@@ -172,10 +128,6 @@
           }
         }
       } 
-    },
-    "Success": {
-      "Type": "Succeed"
     }
   }
 }
-

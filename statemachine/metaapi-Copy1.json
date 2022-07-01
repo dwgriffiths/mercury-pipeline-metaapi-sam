@@ -2,25 +2,25 @@
   "Comment": "A description of my state machine",
   "StartAt": "SetupSaveRawTicks",
   "States": {
-    "SetupSaveRawTicks": {
-      "Next": "MapSaveRawTicks",
+    "MapSaveRawTicks": {
+      "Next": "ChoiceSaveRawTicks",
       "Type": "Task",
       "Resource": "${Pipeline}",
       "Parameters": {
           "function": "setup_save_raw_ticks",
-          "stop.$": "$.['stop', 'placeholder']"
       },
-      "ResultPath": "$.SaveRawTicks.batch_ids"
+      "InputPath": "$",
+      "ResultPath": "$.SaveRawTicks.item_ids"
     },
     "MapSaveRawTicks": {
       "Next": "SetupSaveCleanTicks",
       "Type": "Map",
       "MaxConcurrency": 1,
-      "ItemsPath": "$.SaveRawTicks.batch_ids",
+      "ItemsPath": "$.SaveRawTicks.item_ids",
       "ResultPath": "$.SaveRawTicks.results",
       "Parameters": {
         "function": "save_raw_ticks",
-        "batch_id.$": "$$.Map.Item.Value"
+        "item_id.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveRawTicks",
@@ -39,19 +39,18 @@
       "Resource": "${Pipeline}",
       "Parameters": {
           "function": "setup_save_clean_ticks",
-          "overwrite.$": "$.['overwrite', 'placeholder']"
       },
-      "ResultPath": "$.SaveCleanTicks.batch_ids"
+      "ResultPath": "$.SaveCleanTicks.item_ids",
     },
     "MapSaveCleanTicks": {
       "Next": "SetupSaveCandlesFromTicks",
       "Type": "Map",
-      "MaxConcurrency": 10000,
-      "ItemsPath": "$.SaveCleanTicks.batch_ids",
+      "MaxConcurrency": 0,
+      "ItemsPath": "$.SaveCleanTicks.item_ids",
       "ResultPath": "$.SaveCleanTicks.results",
       "Parameters": {
         "function": "save_clean_ticks",
-        "batch_id.$": "$$.Map.Item.Value"
+        "item_id.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCleanTicks",
@@ -70,19 +69,18 @@
       "Resource": "${Pipeline}",
       "Parameters": {
           "function": "setup_save_candles_from_ticks",
-          "overwrite.$": "$.['overwrite', 'placeholder']"
       },
-      "ResultPath": "$.SaveCandlesFromTicks.batch_ids"
+      "ResultPath": "$.SaveCandlesFromTicks.item_ids",
     },
     "MapSaveCandlesFromTicks": {
       "Next": "SetupSaveCandlesFFill",
       "Type": "Map",
-      "MaxConcurrency": 10000,
-      "ItemsPath": "$.SaveCandlesFromTicks.batch_ids",
+      "MaxConcurrency": 0,
+      "ItemsPath": "$.SaveCandlesFromTicks.item_ids",
       "ResultPath": "$.SaveCandlesFromTicks.results",
       "Parameters": {
         "function": "save_candles_from_ticks",
-        "batch_id.$": "$$.Map.Item.Value"
+        "item_id.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCandlesFromTicks",
@@ -93,7 +91,7 @@
             "Resource": "${Pipeline}"
           }
         }
-      } 
+      }
     },
     "SetupSaveCandlesFFill": {
       "Next": "MapSaveCandlesFFill",
@@ -104,19 +102,18 @@
           "name_dataset_in": "from_ticks",
           "name_dataset_out": "ffill",
           "function_names": ["ffill"],
-          "overwrite.$": "$.['overwrite', 'placeholder']"
       },
-      "ResultPath": "$.SaveCandlesFFill.batch_ids"
+      "ResultPath": "$.SaveCandlesFFill.ffill.item_ids",
     },
     "MapSaveCandlesFFill": {
-      "End": true,
+      "Next": "Success",
       "Type": "Map",
-      "MaxConcurrency": 10000,
-      "ItemsPath": "$.SaveCandlesFFill.batch_ids",
-      "ResultPath": "$.SaveCandlesFFill.results",
+      "MaxConcurrency": 0,
+      "ItemsPath": "$.SaveCandlesFFill.ffill.item_ids",
+      "ResultPath": "$.SaveCandlesFFill.ffill.results",
       "Parameters": {
         "function": "save_candles_transformed",
-        "batch_id.$": "$$.Map.Item.Value"
+        "item_id.$": "$$.Map.Item.Value"
       },
       "Iterator": {
         "StartAt": "SaveCandlesFFill",
@@ -128,6 +125,10 @@
           }
         }
       } 
+    },
+    "Success": {
+      "Type": "Succeed"
     }
   }
 }
+

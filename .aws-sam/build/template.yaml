@@ -71,9 +71,6 @@ Resources:
       PrimaryKey:
         Name: id
         Type: Number
-      ProvisionedThroughput:
-        ReadCapacityUnits: 10000
-        WriteCapacityUnits: 1
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:

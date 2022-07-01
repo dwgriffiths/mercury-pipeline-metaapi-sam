@@ -14,8 +14,6 @@ DIR_CANDLES_ROOT = "projects/mercury/data/clean/candles"
 
 TABLE_PIPELINE = "mercury-pipeline-metaapi-PipelineTable-T7XW90KNN0Q5"
 
-MAX_ITERATIONS = 336
-
 # Frequency order
 FREQUENCIES = OrderedDict()
 FREQUENCIES["15S"] = {"seconds":15}

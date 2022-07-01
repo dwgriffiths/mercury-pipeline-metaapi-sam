@@ -15,6 +15,13 @@ def setup_save_raw_ticks(
     stop = True if stop is None else stop
     batch_size = 12 if batch_size is None else max(min(batch_size, 12), 1)
 
+    item_ids = (
+        wr.dynamodb
+        .get_table(TABLE_PIPELINE)
+        .scan(AttributesToGet=['id',])["Items"]
+    )
+    wr.dynamodb.delete_items(item_ids, TABLE_PIPELINE)
+
     datetimesutc_from, datetimesutc_to = get_datetime_boundaries(
         DATETIMEUTC_FROM,
         DATETIMEUTC_TO
@@ -40,11 +47,10 @@ def setup_save_raw_ticks(
                 "datetimestr_to": dstr_to,
             })
     items = sorted(items, key=lambda x: x.get("datetimestr_from"), reverse=True)
-    ids = [x for x in range(len(items))]
-    items = [x | {"id":i} for i, x in enumerate(items)]
-    wr.dynamodb.put_items(items, TABLE_PIPELINE)
-    return ids
-    return batch_items(items, batch_size)
+    batches = batch_items(items, batch_size)
+    wr.dynamodb.put_items(batches, TABLE_PIPELINE)
+    batch_ids = [x["id"] for x in batches]
+    return batch_ids
     
 async def save_raw_ticks(
     symbol: str,

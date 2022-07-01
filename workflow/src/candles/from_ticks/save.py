@@ -12,13 +12,18 @@ from src.candles.from_ticks.get import get_candles_from_ticks
 def setup_save_candles_from_ticks(
     overwrite: bool = None,
     batch_size: int = None,
-    SaveCandlesFromTicks: dict = None,
     **kwargs
 ):
     overwrite = False if overwrite is None else overwrite
-    batch_size = 48 if batch_size is None else max(min(batch_size, 48), 1)
-    overwrite = overwrite if SaveCandlesFromTicks is None else False
+    batch_size = 12 if batch_size is None else max(min(batch_size, 12), 1)
     name_dataset = "from_ticks"
+    
+    item_ids = (
+        wr.dynamodb
+        .get_table(TABLE_PIPELINE)
+        .scan(AttributesToGet=['id',])["Items"]
+    )
+    wr.dynamodb.delete_items(item_ids, TABLE_PIPELINE)
     
     keys_clean_ticks = get_matching_keys_clean_ticks()
     keys_candles_saved = get_matching_keys_candles(name_dataset)
@@ -51,7 +56,10 @@ def setup_save_candles_from_ticks(
         if item["frequencies"]:
             items.append(item)
     items = sorted(items, key=lambda x: x.get("datetimestr"), reverse=True)
-    return batch_items(items, batch_size)
+    batches = batch_items(items, batch_size)
+    wr.dynamodb.put_items(batches, TABLE_PIPELINE)
+    batch_ids = [x["id"] for x in batches]
+    return batch_ids
 
 def save_candles_from_ticks(
     prefix_clean_ticks: str,

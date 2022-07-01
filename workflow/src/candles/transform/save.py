@@ -38,15 +38,20 @@ def setup_save_candles_transformed(
     function_names: list,
     overwrite: bool = None,
     batch_size: int = None,
-    SaveCandlesTransformed: dict = None,
     lookback_rows: int = None,
     **kwargs
 ):
     overwrite = False if overwrite is None else overwrite
-    batch_size = 48 if batch_size is None else max(min(batch_size, 48), 1)
-    overwrite = overwrite if SaveCandlesTransformed is None or SaveCandlesTransformed.get(name_dataset_out) is None else False
+    batch_size = 12 if batch_size is None else max(min(batch_size, 12), 1)
     lookback_rows = 60 if lookback_rows is None else max(min(lookback_rows, 60), 1)
     assert all([f in FUNCTIONS for f in function_names])
+    
+    item_ids = (
+        wr.dynamodb
+        .get_table(TABLE_PIPELINE)
+        .scan(AttributesToGet=['id',])["Items"]
+    )
+    wr.dynamodb.delete_items(item_ids, TABLE_PIPELINE)
     
     prefixes_in = get_matching_prefixes_candles_by_frequency(name_dataset_in)
     keys_out_saved = get_matching_keys_candles(name_dataset_out)
@@ -79,7 +84,10 @@ def setup_save_candles_transformed(
                     "datetimestr": parameters["date"] + parameters["hour"]
                 })
     items = sorted(items, key=lambda x: x.get("datetimestr"), reverse=True)
-    return batch_items(items, batch_size)
+    batches = batch_items(items, batch_size)
+    wr.dynamodb.put_items(batches, TABLE_PIPELINE)
+    batch_ids = [x["id"] for x in batches]
+    return batch_ids
 
 def save_candles_transformed(
     prefix_in: str,

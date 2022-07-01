@@ -1,4 +1,5 @@
 import asyncio
+import awswrangler as wr
 from datetime import datetime, timedelta, date
 
 from src.config import *
@@ -8,49 +9,44 @@ def batch_items(
     items: list,
     batch_size: int
 ):
-    n_items = len(items)
-    n_batches_total = int(n_items / batch_size) + int(n_items % batch_size != 0)
-    N = min(n_items, MAX_ITERATIONS)
+    N = len(items)
     n_batches = int(N / batch_size) + int(N % batch_size != 0)
     batches = [[] for i in range(n_batches)]
     for i in range(N):
         j = i % n_batches
         batches[j].append(items[i])
-    return {
-        "n_items": n_items,
-        "n_batches_total": n_batches_total,
-        "n_batches": n_batches,
-        "batches": batches
-    }
+    batches = [{"id":i, "batch":batch} for i, batch in enumerate(batches)]
+    return batches
 
-async def job_batch_async(
+async def process_batch_async(
     func,
-    batch: list
+    batch_id: int = None,
 ):
     results = []
-    for i, item in enumerate(batch):
+    table = wr.dynamodb.get_table(TABLE_PIPELINE)
+    batch = table.get_item(Key={"id":batch_id})["Item"]
+    for item in batch["batch"]:
         result = await func(**item)
         results.append(result)
     return all(results)
 
-def job_batch(
+def process_batch(
     func,
-    batch: list = [],
+    batch_id: int = None,
     is_async: bool = False
 ):
     if is_async:
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(
-            job_batch_async(func, batch)
+            process_batch_async(func, batch_id)
         )
     results = []
-    for item in batch:
-        # tic = datetime.now()
+    table = wr.dynamodb.get_table(TABLE_PIPELINE)
+    batch = table.get_item(Key={"id":batch_id})["Item"]
+    for item in batch["batch"]:
         results.append(func(**item))
-        # toc = datetime.now()
-        # print((toc-tic).total_seconds())
+    wr.dynamodb.delete_items([{"id":batch_id}], TABLE_PIPELINE)
     return all(results)
-
 
 def get_datetime_boundaries(
     datetimeutc_from: datetime,

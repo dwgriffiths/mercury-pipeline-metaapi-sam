@@ -1,5 +1,5 @@
 awswrangler
-metaapi-cloud-sdk==19.5.0
+metaapi-cloud-sdk>=19.5.0
 pandas
 pytz
 requests
