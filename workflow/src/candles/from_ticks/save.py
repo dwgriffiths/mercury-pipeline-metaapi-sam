@@ -74,7 +74,8 @@ def save_candles_from_ticks(
         # Load clean ticks
         df_clean_ticks = wr.s3.read_parquet(
             path=prefix_clean_ticks,
-            dataset=True
+            dataset=True,
+            path_suffix=".parquet",
         )
 
         # Candlise ticks

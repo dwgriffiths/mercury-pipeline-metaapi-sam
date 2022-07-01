@@ -9,7 +9,6 @@ def get_matching_keys_candles(
     name_dataset: str
 ):
     path = f"s3://{BUCKET}/{DIR_CANDLES_ROOT}/{name_dataset}"
-    print(path)
     return wr.s3.list_objects(path, suffix=".parquet")
 
 def get_matching_prefixes_candles_by_frequency(name_dataset: str):
@@ -17,7 +16,7 @@ def get_matching_prefixes_candles_by_frequency(name_dataset: str):
     for symbol in SYMBOLS:
         prefixes[symbol] = {}
         for frequency in FREQUENCIES:
-            prefix = f"{DIR_CANDLES_ROOT}/{name_dataset}/symbol={symbol}/frequency={frequency}/"
+            prefix = f"{name_dataset}/symbol={symbol}/frequency={frequency}/"
             prefixes[symbol][frequency] = sorted(
                 get_prefixes_from_keys(
                     get_matching_keys_candles(prefix)

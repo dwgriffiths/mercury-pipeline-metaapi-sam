@@ -6,7 +6,7 @@ from src.utils import *
 from src.ticks.raw.save import setup_save_raw_ticks, save_raw_ticks
 from src.ticks.clean.save import setup_save_clean_ticks, save_clean_ticks
 from src.candles.from_ticks.save import setup_save_candles_from_ticks, save_candles_from_ticks
-from src.candles.transform.save import setup_save_candles_transformed
+from src.candles.transform.save import setup_save_candles_transformed, save_candles_transformed
 
 functions = {
     "setup_save_raw_ticks": {
@@ -43,7 +43,12 @@ functions = {
         "function": setup_save_candles_transformed,
         "batch": False,
         "is_async": False,
-    }
+    },
+    "save_candles_transformed": {
+        "function": save_candles_transformed,
+        "batch": True,
+        "is_async": False,
+    },
 }
 def lambda_handler(event, context):
     function_name = event.get("function")
