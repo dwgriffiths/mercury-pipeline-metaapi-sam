@@ -6,7 +6,7 @@ from src.utils import *
 from src.ticks.raw.save import setup_save_raw_ticks, save_raw_ticks
 from src.ticks.clean.save import setup_save_clean_ticks, save_clean_ticks
 from src.candles.from_ticks.save import setup_save_candles_from_ticks, save_candles_from_ticks
-from src.candles.transform.setup.lookback import setup_candles_lookback
+from src.candles.transform.save import setup_save_candles_transformed
 
 functions = {
     "setup_save_raw_ticks": {
@@ -37,6 +37,11 @@ functions = {
     "save_candles_from_ticks": {
         "function": save_candles_from_ticks,
         "batch": True,
+        "is_async": False,
+    },
+    "setup_save_candles_transformed": {
+        "function": setup_save_candles_transformed,
+        "batch": False,
         "is_async": False,
     }
 }

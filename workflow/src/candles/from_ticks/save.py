@@ -12,21 +12,24 @@ from src.candles.from_ticks.get import get_candles_from_ticks
 def setup_save_candles_from_ticks(
     overwrite: bool = None,
     batch_size: int = None,
+    SaveCandlesFromTicks: dict = None,
     **kwargs
 ):
     overwrite = False if overwrite is None else overwrite
     batch_size = 48 if batch_size is None else max(min(batch_size, 48), 1)
+    overwrite = overwrite if SaveCandlesFromTicks is None else False
     name_dataset = "from_ticks"
     
     keys_clean_ticks = get_matching_keys_clean_ticks()
     keys_candles_saved = get_matching_keys_candles(name_dataset)
     
     if overwrite:
-        delete_objects(BUCKET, keys_candles_saved)
+        delete_objects(keys_candles_saved)
         keys_candles_saved = []
+        
     prefixes_clean_ticks = get_prefixes_from_keys(keys_clean_ticks)
     prefixes_candles_saved = set(get_prefixes_from_keys(keys_candles_saved))
-        
+
     items = []
     for prefix_clean_ticks in prefixes_clean_ticks:
         parameters = get_parameters_from_key(prefix_clean_ticks)
@@ -60,7 +63,9 @@ def save_candles_from_ticks(
         
         # Delete any objects which are already there.
         prefix_candles = convert_prefix_clean_ticks_to_prefix_candles(
-            prefix_clean_ticks
+            prefix_clean_ticks,
+            frequency,
+            name_dataset
         )
         wr.s3.delete_objects(
             get_matching_keys_clean_ticks(prefix_candles)
@@ -68,12 +73,12 @@ def save_candles_from_ticks(
     
         # Load clean ticks
         df_clean_ticks = wr.s3.read_parquet(
-            path=f"s3://{BUCKET}/{prefix_clean_ticks}",
+            path=prefix_clean_ticks,
             dataset=True
         )
 
         # Candlise ticks
-        df_candles = get_ticks_to_candles(df_clean_ticks, frequency)
+        df_candles = get_candles_from_ticks(df_clean_ticks, frequency)
         
         # Make sure the partition_cols are in there
         filters = get_parameters_from_key(prefix_clean_ticks)

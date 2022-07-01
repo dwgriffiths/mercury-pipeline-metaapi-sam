@@ -11,21 +11,29 @@ from src.ticks.clean.get import get_clean_ticks
 def setup_save_clean_ticks(
     overwrite: bool = None,
     batch_size: int = None,
-    prev: list = None,
+    SaveCleanTicks: dict = None,
     **kwargs
 ):
     overwrite = False if overwrite is None else overwrite
     batch_size = 48 if batch_size is None else max(min(batch_size, 48), 1)
-    overwrite = overwrite if prev is None else False
+    overwrite = overwrite if SaveCleanTicks is None else False
+    
+    # print(SaveCleanTicks)
+    # print(overwrite)
     
     keys_raw_ticks = get_matching_keys_raw_ticks()
     keys_clean_ticks_saved = get_matching_keys_clean_ticks()
+
+    # print(keys_clean_ticks_saved[0])
     
     if overwrite:
-        wr.s3.delete_objects(BUCKET, keys_clean_ticks_saved)
+        # print("Overwriting")
+        wr.s3.delete_objects(keys_clean_ticks_saved)
         keys_clean_ticks_saved = []
     prefixes_clean_ticks_saved = set(get_prefixes_from_keys(keys_clean_ticks_saved))
 
+    # assert False
+    
     items = []
     for key_raw_ticks in keys_raw_ticks:
         if key_raw_ticks.endswith("_0.json"):

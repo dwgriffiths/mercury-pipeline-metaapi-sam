@@ -13,7 +13,7 @@ def get_prefix_raw_ticks(
 
 def get_matching_keys_raw_ticks():
     path = f"s3://{BUCKET}/{DIR_RAW_TICKS}"
-    return wr.s3.list_objects(path)
+    return wr.s3.list_objects(path, suffix=".json")
 
 def get_matching_prefixes_raw_ticks():
     keys_raw_ticks = get_matching_keys_raw_ticks()

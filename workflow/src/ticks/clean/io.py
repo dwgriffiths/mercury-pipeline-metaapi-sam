@@ -7,7 +7,7 @@ from src.utils import *
 
 def get_matching_keys_clean_ticks(key: str = DIR_CLEAN_TICKS):
     path = f"s3://{BUCKET}/{key}"
-    return wr.s3.list_objects(path)
+    return wr.s3.list_objects(path, suffix=".parquet")
 
 def convert_key_raw_ticks_to_clean_ticks(
     key_raw_ticks: str
