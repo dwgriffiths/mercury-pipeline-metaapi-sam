@@ -48,7 +48,11 @@ def setup_save_clean_ticks(
     batches = batch_items(items, batch_size)
     wr.dynamodb.put_items(batches, TABLE_PIPELINE)
     batch_ids = [x["id"] for x in batches]
-    return batch_ids
+    
+    n_batches = len(batch_ids)
+    if n_batches <= 50:
+        return [batch_ids]
+    return [batch_ids[i:min(i+50, n_batches)] for i in range(0, n_batches, 50)]
 
 def save_clean_ticks(
     key_raw_ticks: str,

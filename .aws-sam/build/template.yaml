@@ -107,19 +107,9 @@ Resources:
             - Ref: MetaAPIDemoAccountID
           - Effect: Allow
             Action:
-            - dynamodb:BatchGet*
-            - dynamodb:DescribeStream
-            - dynamodb:DescribeTable
-            - dynamodb:Get*
-            - dynamodb:Query
-            - dynamodb:Scan
-            - dynamodb:BatchWrite*
-            - dynamodb:CreateTable
-            - dynamodb:Delete*
-            - dynamodb:Update*
-            - dynamodb:PutItem
+            - dynamodb:*
             Resource:
-              Fn::GetAtt:
+            - Fn::GetAtt:
               - PipelineTable
               - Arn
           - Effect: Allow

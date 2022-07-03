@@ -65,9 +65,6 @@ Resources:
       PrimaryKey:
         Name: id
         Type: Number
-      # ProvisionedThroughput:
-      #   ReadCapacityUnits: 10000
-      #   WriteCapacityUnits: 100
 
   #################
   ##### ROLES #####
@@ -107,18 +104,9 @@ Resources:
                   - !Ref MetaAPIDemoAccountID
               - Effect: Allow
                 Action:
-                  - dynamodb:BatchGet*
-                  - dynamodb:DescribeStream
-                  - dynamodb:DescribeTable
-                  - dynamodb:Get*
-                  - dynamodb:Query
-                  - dynamodb:Scan
-                  - dynamodb:BatchWrite*
-                  - dynamodb:CreateTable
-                  - dynamodb:Delete*
-                  - dynamodb:Update*
-                  - dynamodb:PutItem
-                Resource: !GetAtt [ PipelineTable, Arn]
+                  - "dynamodb:*"
+                Resource:
+                  - !GetAtt [ PipelineTable, Arn]
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
