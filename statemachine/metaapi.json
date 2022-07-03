@@ -8,7 +8,7 @@
       "Resource": "${Pipeline}",
       "Parameters": {
           "function": "setup_save_raw_ticks",
-          "stop.$": "$.['stop', 'placeholder']"
+          "kwargs.$": "$.['stop', 'placeholder']"
       },
       "ResultPath": "$.SaveRawTicks.batch_ids"
     },
@@ -53,15 +53,14 @@
       "Resource": "${Pipeline}",
       "Parameters": {
           "function": "setup_save_clean_ticks",
-          "stop.$": "$$.['stop', 'placeholder']",
-          "overwrite.$": "$$.['overwrite', 'placeholder']"
+          "kwargs.$": "$$.['overwrite', 'placeholder']",
       },
       "ResultPath": "$.SaveCleanTicks.batch_ids"
     },
     "MapSaveCleanTicks": {
       "Next": "SetupSaveCandlesFromTicks",
       "Type": "Map",
-      "MaxConcurrency": 1,
+      "MaxConcurrency": 50,
       "ItemsPath": "$.SaveCleanTicks.batch_ids",
       "ResultPath": "$.SaveCleanTicks.results",
       "Parameters": {
@@ -73,7 +72,7 @@
           "MapInnerSaveCleanTicks": {
             "End": true,
             "Type": "Map",
-            "MaxConcurrency": 1,
+            "MaxConcurrency": 50,
             "ItemsPath": "$.batch_ids",
             "Parameters": {
               "function": "save_clean_ticks",
@@ -99,15 +98,14 @@
       "Resource": "${Pipeline}",
       "Parameters": {
           "function": "setup_save_candles_from_ticks",
-          "stop.$": "$$.['stop', 'placeholder']",
-          "overwrite.$": "$$.['overwrite', 'placeholder']"
+          "kwargs.$": "$$.['overwrite', 'placeholder']",
       },
       "ResultPath": "$.SaveCandlesFromTicks.batch_ids"
     },
     "MapSaveCandlesFromTicks": {
       "Next": "SetupSaveCandlesFFill",
       "Type": "Map",
-      "MaxConcurrency": 1,
+      "MaxConcurrency": 50,
       "ItemsPath": "$.SaveCandlesFromTicks.batch_ids",
       "ResultPath": "$.SaveCandlesFromTicks.results",
       "Parameters": {
@@ -119,7 +117,7 @@
           "MapInnerSaveCandlesFromTicks": {
             "End": true,
             "Type": "Map",
-            "MaxConcurrency": 1,
+            "MaxConcurrency": 50,
             "ItemsPath": "$.batch_ids",
             "Parameters": {
               "function": "save_candles_from_ticks",
@@ -148,15 +146,14 @@
           "name_dataset_in": "from_ticks",
           "name_dataset_out": "ffill",
           "function_names": ["ffill"],
-          "stop.$": "$$.['stop', 'placeholder']",
-          "overwrite.$": "$$.['overwrite', 'placeholder']"
+          "kwargs.$": "$$.['overwrite', 'placeholder']",
       },
       "ResultPath": "$.SaveCandlesFFill.batch_ids"
     },
     "MapSaveCandlesFFill": {
       "End": true,
       "Type": "Map",
-      "MaxConcurrency": 1,
+      "MaxConcurrency": 50,
       "ItemsPath": "$.SaveCandlesFFill.batch_ids",
       "ResultPath": "$.SaveCandlesFFill.results",
       "Parameters": {
@@ -168,7 +165,7 @@
           "MapInnerSaveCandlesFFill": {
             "End": true,
             "Type": "Map",
-            "MaxConcurrency": 1,
+            "MaxConcurrency": 50,
             "ItemsPath": "$.batch_ids",
             "Parameters": {
               "function": "save_candles_transformed",

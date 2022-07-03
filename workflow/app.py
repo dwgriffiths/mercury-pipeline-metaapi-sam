@@ -50,8 +50,9 @@ def lambda_handler(event, context):
     function_name = event.get("function")
     assert function_name
     assert function_name in functions_setup | functions_process
-    kwargs = {k:v for k, v in event.items() if k not in ["function"]}
-
+    kwargs = {} if event.get("kwargs") is None else event.get("kwargs")
+    kwargs.update({k:v for k, v in event.items() if k not in ["function", "kwargs"]})
+    
     if function_name in functions_setup:
         function = functions_setup[function_name]["function"]
         kwargs["is_async"] = functions_setup[function_name]["is_async"]
