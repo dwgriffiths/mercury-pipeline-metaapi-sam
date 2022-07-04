@@ -1,5 +1,13 @@
+import awswrangler as wr
+import botocore
 from collections import OrderedDict
 from datetime import datetime, timedelta, date
+
+wr.config.botocore_config = botocore.config.Config(
+    retries={"max_attempts": 10},
+    connect_timeout=20,
+    max_pool_connections=20
+)
 
 SYMBOLS = ["GBPUSD", "EURUSD"]
 DATETIMEUTC_FROM = datetime(2021, 1, 1, 0, 0, 0)
