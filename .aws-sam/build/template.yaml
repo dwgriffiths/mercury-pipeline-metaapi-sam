@@ -35,13 +35,6 @@ Resources:
           Fn::GetAtt:
           - Pipeline
           - Arn
-      Events:
-        DailySchedule:
-          Type: Schedule
-          Properties:
-            Description: Schedule to update the dataset every morning
-            Enabled: true
-            Schedule: cron(0 2 * * ? *)
       Policies:
       - LambdaInvokePolicy:
           FunctionName:
@@ -61,7 +54,7 @@ Resources:
       MemorySize: 512
       ImageUri: pipeline:python3.9-v1
     Metadata:
-      DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\workflow
+      DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\lambda
       DockerTag: python3.9-v1
       Dockerfile: Dockerfile
       SamResourceId: Pipeline
@@ -71,6 +64,9 @@ Resources:
       PrimaryKey:
         Name: id
         Type: Number
+      ProvisionedThroughput:
+        ReadCapacityUnits: 25
+        WriteCapacityUnits: 25
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
