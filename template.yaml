@@ -65,6 +65,9 @@ Resources:
       PrimaryKey:
         Name: id
         Type: Number
+      ProvisionedThroughput:
+        ReadCapacityUnits: 25
+        WriteCapacityUnits: 25
 
   #################
   ##### ROLES #####
