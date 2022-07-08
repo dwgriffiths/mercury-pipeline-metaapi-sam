@@ -2,6 +2,8 @@ from datetime import datetime
 import pandas as pd
 import pytz
 
+# from IPython.display import display
+
 columns = [
     "symbol",
     "frequency",
@@ -32,6 +34,9 @@ def get_clean_ticks(
     df_ticks["year"] = df_ticks["date"].str[:4]
     df_ticks = df_ticks.drop(columns=["time", "brokerTime"])
     df_ticks["frequency"] = "tick"
+    for col in ["last", "volume"]:
+        if col not in df_ticks.columns:
+            df_ticks[col] = pd.NA
     return df_ticks[columns]
         
     
