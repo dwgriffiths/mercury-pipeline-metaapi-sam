@@ -89,9 +89,9 @@ def setup_save_candles_transformed(
     batch_ids = [x["id"] for x in batches]
     
     n_batches = len(batch_ids)
-    if n_batches <= 50:
+    if n_batches <= MAX_BATCH_SIZE:
         return [batch_ids]
-    return [batch_ids[i:min(i+50, n_batches)] for i in range(0, n_batches, 50)]
+    return [batch_ids[i:min(i+MAX_BATCH_SIZE, n_batches)] for i in range(0, n_batches, MAX_BATCH_SIZE)]
 
 def save_candles_transformed(
     prefix_in: str,
@@ -112,26 +112,39 @@ def save_candles_transformed(
     # Load candles
     parameters_in = get_parameters_from_key(prefix_in)
     parameters_lookback = get_parameters_from_key(prefix_lookback)
-    parameters_filter = {}
-    for key in parameters_in:
-        value_in, value_lookback = parameters_in[key], parameters_lookback[key]
-        parameters_filter[f"{key}_min"] = min(value_in, value_lookback)
-        parameters_filter[f"{key}_max"] = max(value_in, value_lookback)
-
-    f_filter = lambda x: True if all([
-        all([
-            x[key] >= parameters_filter[f"{key}_min"],
-            x[key] <= parameters_filter[f"{key}_max"],
-        ]) for key in parameters_in
-    ]) else False
-                             
-    # Load dataset
-    df_in = wr.s3.read_parquet(
-        path=f"s3://{BUCKET}/{DIR_CANDLES_ROOT}/{name_dataset_in}/",
-        dataset=True,
-        path_suffix=".parquet",
-        partition_filter=f_filter
+    datetime_in = datetime.strptime(
+        parameters_in["date"] + parameters_in["hour"], 
+        "%Y%m%d%H"
     )
+    datetime_lookback = datetime.strptime(
+        parameters_lookback["date"] + parameters_lookback["hour"], 
+        "%Y%m%d%H"
+    )
+    n_hours = int((datetime_in - datetime_lookback).total_seconds() / 3600) + 1
+    hours = [datetime_lookback + timedelta(hours=i) for i in range(n_hours)]
+    
+    keys = [
+        f"s3://{BUCKET}/{DIR_CANDLES_ROOT}/" + "/".join([
+            name_dataset_in,
+            f"symbol={parameters_in['symbol']}",
+            f"frequency={parameters_in['frequency']}",
+            f"year={dt.strftime('%Y')}",
+            f"month={dt.strftime('%m')}",
+            f"date={dt.strftime('%Y%m%d')}",
+            f"hour={dt.strftime('%H')}",
+            ""
+        ]) for dt in hours
+    ]
+    print(prefix_in)
+    print(prefix_lookback)
+    print(keys)
+           
+    # Load dataset
+    l = []
+    for key in keys:
+        if wr.s3.list_objects(key) != []:
+            l.append(wr.s3.read_parquet(key, dataset=True))
+    df_in = pd.concat(l)
                              
     # Transform candles
     df_out = df_in.copy()

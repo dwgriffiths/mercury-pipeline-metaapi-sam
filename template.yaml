@@ -34,13 +34,13 @@ Resources:
       DefinitionUri: statemachine/metaapi.json
       DefinitionSubstitutions:
         Pipeline: !GetAtt Pipeline.Arn
-      # Events:
-      #   DailySchedule:
-      #     Type: Schedule
-      #     Properties:
-      #       Description: Schedule to update the dataset every morning
-      #       Enabled: True
-      #       Schedule: cron(0 2 * * ? *)
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Description: Schedule to update the dataset every morning
+            Enabled: True
+            Schedule: cron(0 2 * * ? *)
       Policies:
         - LambdaInvokePolicy:
             FunctionName: !Ref Pipeline

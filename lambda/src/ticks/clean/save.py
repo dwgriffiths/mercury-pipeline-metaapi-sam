@@ -50,9 +50,9 @@ def setup_save_clean_ticks(
     batch_ids = [x["id"] for x in batches]
     
     n_batches = len(batch_ids)
-    if n_batches <= 50:
+    if n_batches <= MAX_BATCH_SIZE:
         return [batch_ids]
-    return [batch_ids[i:min(i+50, n_batches)] for i in range(0, n_batches, 50)]
+    return [batch_ids[i:min(i+MAX_BATCH_SIZE, n_batches)] for i in range(0, n_batches, MAX_BATCH_SIZE)]
 
 def save_clean_ticks(
     key_raw_ticks: str,

@@ -35,6 +35,13 @@ Resources:
           Fn::GetAtt:
           - Pipeline
           - Arn
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Description: Schedule to update the dataset every morning
+            Enabled: true
+            Schedule: cron(0 2 * * ? *)
       Policies:
       - LambdaInvokePolicy:
           FunctionName:
