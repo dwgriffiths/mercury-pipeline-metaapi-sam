@@ -3,7 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   python3.9
   
-  Sample SAM Template for mercury-pipeline-metaapi-sam
+  Sample SAM Template for mercury-Controller-metaapi-sam
   
 Parameters:
   ProjectName:
@@ -23,29 +23,42 @@ Parameters:
     Type: String
     Default: arn:aws:secretsmanager:eu-west-2:008739416430:secret:metaapi-account-id-demo-mJYsCi
 
-Globals:
-  Function:
-    Timeout: 3
-
 Resources:
-  StateMachineMain:
+
+  ##########################
+  ##### STEP FUNCTIONS #####
+  ##########################
+  StateMachineAll:
     Type: AWS::Serverless::StateMachine
     Properties:
-      DefinitionUri: statemachine/metaapi.json
+      DefinitionUri: statemachine/all.json
       DefinitionSubstitutions:
-        Pipeline: !GetAtt Pipeline.Arn
-      Events:
-        DailySchedule:
-          Type: Schedule
-          Properties:
-            Description: Schedule to update the dataset every morning
-            Enabled: True
-            Schedule: cron(0 2 * * ? *)
+        Controller: !GetAtt Controller.Arn
       Policies:
         - LambdaInvokePolicy:
-            FunctionName: !Ref Pipeline
+            FunctionName: !Ref Controller
             
-  Pipeline:
+  StateMachineDaily:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/daily.json
+      DefinitionSubstitutions:
+        Controller: !GetAtt Controller.Arn
+      # Events:
+      #   DailySchedule:
+      #     Type: Schedule
+      #     Properties:
+      #       Description: Schedule to update the dataset every morning
+      #       Enabled: True
+      #       Schedule: cron(0 2 * * ? *)
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref Controller
+            
+  ##################
+  ##### LAMBDA #####
+  ##################     
+  Controller:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
@@ -59,7 +72,10 @@ Resources:
       DockerContext: ./lambda
       DockerTag: python3.9-v1
       
-  PipelineTable:
+  ####################
+  ##### DYNAMODB #####
+  ####################
+  ControllerTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
       PrimaryKey:
@@ -109,7 +125,7 @@ Resources:
                 Action:
                   - "dynamodb:*"
                 Resource:
-                  - !GetAtt [ PipelineTable, Arn]
+                  - !GetAtt [ ControllerTable, Arn]
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup

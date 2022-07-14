@@ -135,9 +135,9 @@ def save_candles_transformed(
             ""
         ]) for dt in hours
     ]
-    print(prefix_in)
-    print(prefix_lookback)
-    print(keys)
+    # print(prefix_in)
+    # print(prefix_lookback)
+    # print(keys)
            
     # Load dataset
     l = []

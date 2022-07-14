@@ -8,5 +8,5 @@ s3_prefix = "mercury-pipeline-metaapi"
 region = "eu-west-2"
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
-image_repositories = ["Pipeline=008739416430.dkr.ecr.eu-west-2.amazonaws.com/mercurypipelinemetaapi1b4ce271/pipelineaeaeaec5repo"]
+image_repositories = ["Controller=008739416430.dkr.ecr.eu-west-2.amazonaws.com/mercurypipelinemetaapi1b4ce271/controller9bbf3737repo"]
 parameter_overrides = "ProjectName=\"mercury\" Datalake=\"datalake.dgriffiths.io\" MetaAPIKey=\"arn:aws:secretsmanager:eu-west-2:008739416430:secret:metaapi-key-63qzoR\" MetaAPIDemoAccountID=\"arn:aws:secretsmanager:eu-west-2:008739416430:secret:metaapi-account-id-demo-mJYsCi\""

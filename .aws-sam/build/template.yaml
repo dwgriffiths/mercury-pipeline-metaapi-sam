@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: 'python3.9
 
-  Sample SAM Template for mercury-pipeline-metaapi-sam
+  Sample SAM Template for mercury-Controller-metaapi-sam
 
   '
 Parameters:
@@ -22,31 +22,34 @@ Parameters:
     Description: The Arn for the MetaAPIDemoAccountID Secret
     Type: String
     Default: arn:aws:secretsmanager:eu-west-2:008739416430:secret:metaapi-account-id-demo-mJYsCi
-Globals:
-  Function:
-    Timeout: 3
 Resources:
-  StateMachineMain:
+  StateMachineAll:
     Type: AWS::Serverless::StateMachine
     Properties:
-      DefinitionUri: ..\..\statemachine\metaapi.json
+      DefinitionUri: ..\..\statemachine\all.json
       DefinitionSubstitutions:
-        Pipeline:
+        Controller:
           Fn::GetAtt:
-          - Pipeline
+          - Controller
           - Arn
-      Events:
-        DailySchedule:
-          Type: Schedule
-          Properties:
-            Description: Schedule to update the dataset every morning
-            Enabled: true
-            Schedule: cron(0 2 * * ? *)
       Policies:
       - LambdaInvokePolicy:
           FunctionName:
-            Ref: Pipeline
-  Pipeline:
+            Ref: Controller
+  StateMachineDaily:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: ..\..\statemachine\daily.json
+      DefinitionSubstitutions:
+        Controller:
+          Fn::GetAtt:
+          - Controller
+          - Arn
+      Policies:
+      - LambdaInvokePolicy:
+          FunctionName:
+            Ref: Controller
+  Controller:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
@@ -59,13 +62,13 @@ Resources:
         - app.lambda_handler
       Timeout: 900
       MemorySize: 512
-      ImageUri: pipeline:python3.9-v1
+      ImageUri: controller:python3.9-v1
     Metadata:
       DockerContext: C:\Users\Dan\Documents\Projects\forex\mercury-pipeline-metaapi-sam\lambda
       DockerTag: python3.9-v1
       Dockerfile: Dockerfile
-      SamResourceId: Pipeline
-  PipelineTable:
+      SamResourceId: Controller
+  ControllerTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
       PrimaryKey:
@@ -113,7 +116,7 @@ Resources:
             - dynamodb:*
             Resource:
             - Fn::GetAtt:
-              - PipelineTable
+              - ControllerTable
               - Arn
           - Effect: Allow
             Action:

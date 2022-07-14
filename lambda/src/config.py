@@ -10,10 +10,18 @@ wr.config.botocore_config = botocore.config.Config(
 )
 
 SYMBOLS = ["GBPUSD", "EURUSD"]
-DATETIMEUTC_FROM = datetime(2021, 1, 1, 0, 0, 0)
-DATETIMEUTC_TO = (datetime.utcnow()).replace(hour=0, minute=0, second=0, microsecond=0)
+
 
 DATETIME_FORMAT = "%Y%m%d%H%M%S%f"
+DATETIMEUTC_FROM = datetime(2020, 12, 1, 0, 0, 0)
+DATETIMEUTC_TO = (datetime.utcnow()).replace(hour=0, minute=0, second=0, microsecond=0)
+
+DATETIMESTR_FROM = DATETIMEUTC_FROM.strftime(DATETIME_FORMAT)
+DATETIMESTR_TO = DATETIMEUTC_TO.strftime(DATETIME_FORMAT)
+
+
+N_DAYS_TOTAL = (DATETIMEUTC_TO - DATETIMEUTC_FROM).days
+
 
 BUCKET = "datalake.dgriffiths.io"
 DIR_RAW_TICKS = "projects/mercury/data/raw/ticks"

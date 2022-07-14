@@ -1,0 +1,22 @@
+{
+  "Comment": "Get daily data",
+  "StartAt": "FindMissingRawTicks",
+  "States": {
+    "FindMissingRawTicks": {
+      "End": true,
+      "Type": "Task",
+      "Resource": "${Controller}",
+      "Parameters": {
+        "function": {
+          "name": "find_missing_data",
+          "parameters": {
+            "path_database": "raw/ticks",
+            "n_days": 7
+          }
+        },
+        "kwargs.$": "$.['variable1', 'placeholder']"
+      },
+      "ResultPath": "$.FindMissingRawTicks.result"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "Comment": "Get all data",
+  "StartAt": "GetMonths",
+  "States": {
+    "GetMonths": {
+      "Next": "MapFindMissingRawTicks",
+      "Type": "Task",
+      "Resource": "${Controller}",
+      "Parameters": {
+        "function": {
+          "name": "get_months",
+          "parameters": {
+          }
+        },
+        "kwargs.$": "$.['variable1', 'placeholder']"
+      },
+      "ResultPath": "$.GetMonths.result"
+    },
+    "MapFindMissingRawTicks": {
+      "End": true,
+      "Type": "Map",
+      "ItemsPath": "$.GetMonths.result",
+      "Parameters": {
+        "function": {
+          "name": "find_missing_raw_ticks",
+          "parameters": {
+            "month.$": "$$.Map.Item.Value"
+          }
+        }
+      },
+      "ResultPath": "$.FindMissingRawTicks.results",
+      "Iterator": {
+        "StartAt": "FindMissingRawTicks",
+        "States": {
+          "FindMissingRawTicks": {
+            "End": true,
+            "Type": "Task",
+            "Resource": "${Controller}"
+          }
+        } 
+      }
+    }
+  }
+}
