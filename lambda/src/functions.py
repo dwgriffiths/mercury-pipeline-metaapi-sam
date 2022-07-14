@@ -125,7 +125,7 @@ def batch_items(
 
 def find_missing_raw_ticks(
     month: str,
-    dynamo_table: str
+    dynamo_table: str,
     batch_size: int = 12,
 ):
     prefixes_saved_ticks = find_saved_raw_ticks(

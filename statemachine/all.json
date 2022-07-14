@@ -24,7 +24,8 @@
         "function": {
           "name": "find_missing_raw_ticks",
           "parameters": {
-            "month.$": "$$.Map.Item.Value"
+            "month.$": "$$.Map.Item.Value",
+              "dynamo_table": "${DynamoTable}"
           }
         }
       },
