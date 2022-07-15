@@ -3,7 +3,55 @@ import pandas as pd
 import pytz
 from typing import Union
 
-from IPython.display import display
+from src.config import *
+from src.io import *
+from src.batch import process_batch
+
+def save_missing_clean_ticks(
+    dynamo_table: str,
+    batch_id: str,
+):
+    return process_batch(
+        save_clean_ticks,
+        dynamo_table,
+        batch_id,
+        is_async=False
+    )
+
+def save_clean_ticks(
+    key_raw_ticks: str,
+    *args,
+    **kwargs
+):
+    # Load raw ticks
+    data = load_json_data(key_raw_ticks)
+    
+    # Convert raw ticks to clean ticks
+    df_clean_ticks = get_clean_ticks(data)
+    
+    path = "/".join([
+        "s3:/",
+        BUCKET,
+        DIR_CLEAN_TICKS,
+        ""
+    ])
+    
+    #Save as parquet
+    wr.s3.to_parquet(
+        df_clean_ticks,
+        dataset=True,
+        path=path,
+        partition_cols=[
+            "symbol",
+            "frequency",
+            "year",
+            "month",
+            "date",
+            "hour",
+        ],
+        mode="overwrite_partitions"
+    )
+    return True
 
 columns = [
     "symbol",

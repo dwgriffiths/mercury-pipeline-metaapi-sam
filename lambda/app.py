@@ -7,7 +7,7 @@ def lambda_handler(event, context):
     function_name = function["name"]
     parameters = function.get("parameters")
     parameters = {} if not parameters else parameters
-    output_function = getattr(functions, function_name)
+    output_function = getattr(functions, f"wrapper_{function_name}")
     return output_function(**parameters)
 
 

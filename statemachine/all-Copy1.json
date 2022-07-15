@@ -44,7 +44,7 @@
             }
           },
           "MapSaveMissingRawTicks": {
-            "Next": "FindMissingCleanTicks",
+            "End": true,
             "Type": "Map",
             "MaxConcurrency": 1,
             "ItemsPath": "$.FindMissingRawTicks.batch_ids",
@@ -99,7 +99,7 @@
             }
           },
           "MapSaveMissingCleanTicks": {
-            "Next": "FindMissingCandlesFromTicks",
+            "End": true,
             "Type": "Map",
             "MaxConcurrency": 25,
             "ItemsPath": "$.FindMissingCleanTicks.batch_ids",
@@ -128,119 +128,6 @@
                     "StartAt": "SaveMissingCleanTicks",
                     "States": {
                       "SaveMissingCleanTicks": {
-                        "End": true,
-                        "Type": "Task",
-                        "Resource": "${Controller}"
-                      }
-                    }
-                  } 
-                }
-              }
-            } 
-          },
-          "FindMissingCandlesFromTicks": {
-            "Next": "MapSaveMissingCandlesFromTicks",
-            "Type": "Task",
-            "Resource": "${Controller}",
-            "ResultPath": "$.FindMissingCandlesFromTicks.batch_ids",
-            "Parameters": {
-              "function": {
-                "name": "find_missing_candles_from_ticks",
-                "parameters": {
-                  "month.$": "$.month",
-                  "dynamo_table": "${DynamoTable}"
-                }
-              }
-            }
-          },
-          "MapSaveMissingCandlesFromTicks": {
-            "Next": "FindMissingCandlesFFill",
-            "Type": "Map",
-            "MaxConcurrency": 25,
-            "ItemsPath": "$.FindMissingCandlesFromTicks.batch_ids",
-            "Parameters": {
-              "batch_ids.$": "$$.Map.Item.Value"
-            },  
-            "ResultPath": "$.SaveMissingCandlesFromTicks.results",
-            "Iterator": {
-              "StartAt": "MapInnerSaveMissingCandlesFromTicks",
-              "States": {
-                "MapInnerSaveMissingCandlesFromTicks": {
-                  "End": true,
-                  "Type": "Map",
-                  "MaxConcurrency": 25,
-                  "ItemsPath": "$.batch_ids",
-                  "Parameters": {
-                    "function": {
-                      "name": "save_missing_candles_from_ticks",
-                      "parameters": {
-                        "dynamo_table": "${DynamoTable}",
-                        "batch_id.$": "$$.Map.Item.Value"
-                      }
-                    }
-                  },
-                  "Iterator": {
-                    "StartAt": "SaveMissingCandlesFromTicks",
-                    "States": {
-                      "SaveMissingCandlesFromTicks": {
-                        "End": true,
-                        "Type": "Task",
-                        "Resource": "${Controller}"
-                      }
-                    }
-                  } 
-                }
-              }
-            } 
-          },
-          "FindMissingCandlesFFill": {
-            "Next": "MapSaveMissingCandlesFFill",
-            "Type": "Task",
-            "Resource": "${Controller}",
-            "ResultPath": "$.FindMissingCandlesFFill.batch_ids",
-            "Parameters": {
-              "function": {
-                "name": "find_missing_candles",
-                "parameters": {
-                  "month.$": "$.month",
-                  "dynamo_table": "${DynamoTable}",
-                  "name_dataset_in": "from_ticks",
-                  "name_dataset_out": "ffill",
-                  "function_names": ["ffill"]
-                }
-              }
-            }
-          },
-          "MapSaveMissingCandlesFFill": {
-            "End": true,
-            "Type": "Map",
-            "MaxConcurrency": 25,
-            "ItemsPath": "$.FindMissingCandlesFFill.batch_ids",
-            "Parameters": {
-              "batch_ids.$": "$$.Map.Item.Value"
-            },  
-            "ResultPath": "$.SaveMissingCandlesFFill.results",
-            "Iterator": {
-              "StartAt": "MapInnerSaveMissingCandlesFFill",
-              "States": {
-                "MapInnerSaveMissingCandlesFFill": {
-                  "End": true,
-                  "Type": "Map",
-                  "MaxConcurrency": 25,
-                  "ItemsPath": "$.batch_ids",
-                  "Parameters": {
-                    "function": {
-                      "name": "save_missing_candles",
-                      "parameters": {
-                        "dynamo_table": "${DynamoTable}",
-                        "batch_id.$": "$$.Map.Item.Value"
-                      }
-                    }
-                  },
-                  "Iterator": {
-                    "StartAt": "SaveMissingCandlesFFill",
-                    "States": {
-                      "SaveMissingCandlesFFill": {
                         "End": true,
                         "Type": "Task",
                         "Resource": "${Controller}"

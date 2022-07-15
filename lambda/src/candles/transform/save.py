@@ -26,12 +26,6 @@ def ffill(
         )
     return df_out
 
-FUNCTIONS = {
-    "ffill": {
-        "function": ffill,
-    },
-}
-
 def setup_save_candles_transformed(
     name_dataset_in: str,
     name_dataset_out: str,

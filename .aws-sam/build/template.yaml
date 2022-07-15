@@ -32,6 +32,8 @@ Resources:
           Fn::GetAtt:
           - Controller
           - Arn
+        DynamoTable:
+          Ref: ControllerTable
       Policies:
       - LambdaInvokePolicy:
           FunctionName:
@@ -45,6 +47,8 @@ Resources:
           Fn::GetAtt:
           - Controller
           - Arn
+        DynamoTable:
+          Ref: ControllerTable
       Policies:
       - LambdaInvokePolicy:
           FunctionName:
@@ -73,7 +77,7 @@ Resources:
     Properties:
       PrimaryKey:
         Name: id
-        Type: Number
+        Type: String
       ProvisionedThroughput:
         ReadCapacityUnits: 25
         WriteCapacityUnits: 25

@@ -1,9 +1,71 @@
-from datetime import datetime, timedelta, date, time
+from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 import pytz
 
 from src.config import *
+from src.io import *
+from src.batch import process_batch
+
+def save_missing_candles_from_ticks(
+    dynamo_table: str,
+    batch_id: str,
+):
+    return process_batch(
+        save_candles_from_ticks,
+        dynamo_table,
+        batch_id,
+        is_async=False
+    )
+
+def save_candles_from_ticks(
+    prefix_clean_ticks: str,
+    frequencies: list,
+    *args,
+    **kwargs
+):
+    for frequency in frequencies:
+
+        # Load clean ticks
+        df_clean_ticks = wr.s3.read_parquet(
+            path=prefix_clean_ticks,
+            dataset=True,
+            path_suffix=".parquet",
+        )
+
+        # Candlise ticks
+        df_candles = get_candles_from_ticks(df_clean_ticks, frequency)
+        
+        # Make sure the partition_cols are in there
+        filters = get_parameters_from_key(prefix_clean_ticks)
+        for k, v in filters.items():
+            df_candles[k] = v
+        df_candles["frequency"] = frequency
+            
+        path = "/".join([
+            "s3:/",
+            BUCKET,
+            DIR_CANDLES_ROOT,
+            "from_ticks",
+            ""
+        ])
+            
+        #Save as parquet
+        wr.s3.to_parquet(
+            df_candles,
+            path=path,
+            dataset=True,
+            partition_cols=[
+                "symbol",
+                "frequency",
+                "year",
+                "month",
+                "date",
+                "hour",
+            ],
+            mode="overwrite_partitions"
+        )
+    return True
 
 # Helper functions
 def idxmin(s):

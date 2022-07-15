@@ -82,7 +82,7 @@ Resources:
     Properties:
       PrimaryKey:
         Name: id
-        Type: Number
+        Type: String
       ProvisionedThroughput:
         ReadCapacityUnits: 25
         WriteCapacityUnits: 25
