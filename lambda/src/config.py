@@ -13,7 +13,7 @@ SYMBOLS = ["GBPUSD", "EURUSD"]
 
 
 DATETIME_FORMAT = "%Y%m%d%H%M%S%f"
-DATETIMEUTC_FROM = datetime(2021, 1, 1, 0, 0, 0)
+DATETIMEUTC_FROM = datetime(2020, 12, 1, 0, 0, 0)
 DATETIMEUTC_TO = (datetime.utcnow()).replace(hour=0, minute=0, second=0, microsecond=0)
 
 DATETIMESTR_FROM = DATETIMEUTC_FROM.strftime(DATETIME_FORMAT)

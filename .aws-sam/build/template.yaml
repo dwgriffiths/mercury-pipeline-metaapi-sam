@@ -23,7 +23,7 @@ Parameters:
     Type: String
     Default: arn:aws:secretsmanager:eu-west-2:008739416430:secret:metaapi-account-id-demo-mJYsCi
 Resources:
-  StateMachineAll:
+  MercuryPipelineMetaApiAll:
     Type: AWS::Serverless::StateMachine
     Properties:
       DefinitionUri: ..\..\statemachine\all.json
@@ -38,7 +38,7 @@ Resources:
       - LambdaInvokePolicy:
           FunctionName:
             Ref: Controller
-  StateMachineDaily:
+  MercuryPipelineMetaApiDaily:
     Type: AWS::Serverless::StateMachine
     Properties:
       DefinitionUri: ..\..\statemachine\daily.json
@@ -49,6 +49,13 @@ Resources:
           - Arn
         DynamoTable:
           Ref: ControllerTable
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Description: Schedule to update the dataset every morning
+            Enabled: true
+            Schedule: cron(0 2 * * ? *)
       Policies:
       - LambdaInvokePolicy:
           FunctionName:
