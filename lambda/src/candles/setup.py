@@ -9,7 +9,7 @@ def find_candles_to_get(
     prefixes_in: list,
     name_dataset_in: str,
     name_dataset_out: str,
-    function_names: list,
+    transformations: list,
     lookback_rows: int,
     prefixes_saved: list = []
 ):
@@ -32,7 +32,7 @@ def find_candles_to_get(
                     "prefix_in": prefix,
                     "prefix_lookback": prefix_lookback,
                     "name_dataset_out":name_dataset_out,
-                    "function_names":function_names,
+                    "transformations":transformations,
                     "datetimestr": parameters["date"] + parameters["hour"]
                 })
     items = sorted(items, key=lambda x: x.get("datetimestr"), reverse=True)
@@ -81,7 +81,7 @@ def find_missing_candles(
     dynamo_table: str,
     name_dataset_in: str,
     name_dataset_out: str,
-    function_names: list,
+    transformations: list,
     batch_size: int = 50,
     lookback_rows: int = 60,
     *args,
@@ -102,7 +102,7 @@ def find_missing_candles(
         prefixes_in,
         name_dataset_in,
         name_dataset_out,
-        function_names,
+        transformations,
         lookback_rows,
         prefixes_saved=prefixes_out
     )

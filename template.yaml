@@ -57,6 +57,17 @@ Resources:
         - LambdaInvokePolicy:
             FunctionName: !Ref Controller
             
+  MercuryPipelineMetaApiTransformations:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/transformations.json
+      DefinitionSubstitutions:
+        Controller: !GetAtt Controller.Arn
+        DynamoTable: !Ref ControllerTable
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref Controller
+            
   ##################
   ##### LAMBDA #####
   ##################     

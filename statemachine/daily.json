@@ -194,7 +194,7 @@
             "dynamo_table": "${DynamoTable}",
             "name_dataset_in": "from_ticks",
             "name_dataset_out": "ffill",
-            "function_names": ["ffill"]
+            "transformations": ["ffill"]
           }
         }
       }

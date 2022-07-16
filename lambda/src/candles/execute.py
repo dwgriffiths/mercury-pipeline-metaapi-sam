@@ -6,7 +6,7 @@ import pytz
 from src.config import *
 from src.io import *
 from src.batch import process_batch
-import src.candles.transformations as transformations
+import src.candles.transformations as m_transformations
 
 def save_missing_candles(
     dynamo_table: str,
@@ -70,7 +70,7 @@ def save_candles(
     # Transform candles
     df_out = df_in.copy()
     for transformation in transformations:
-        function = getattr(transformations, transformation)     
+        function = getattr(m_transformations, transformation)     
         df_out = function(df_out)
         
     # Filter transformed df to only get new rows
